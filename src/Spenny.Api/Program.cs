@@ -1,9 +1,10 @@
-// Spenny Web API entry point: per-IP rate limiting on /api and dev-only CORS for the local SPA.
-// Routes are deliberately anonymous; access control is applied at the hosting edge (docs/adr/0001).
+// Spenny Web API entry point: per-IP rate limiting on /api, optional PostgreSQL (EF Core), dev-only CORS for the local SPA.
+// Domain routes stay anonymous until in-app auth ships; edge protection per docs/adr/0001.
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Spenny.Api;
+using Spenny.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,8 @@ builder.Services.AddOptions<RateLimiterOptions>()
                 }));
     });
 
+builder.Services.AddSpennyDatabase(builder.Configuration);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(corsPolicyName, policy =>
@@ -47,6 +50,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+app.ApplyMigrationsIfConfigured();
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,0 +1,12 @@
+<Project>
+  <!-- Visual Studio F5: ensure Compose Postgres is up before building API/client (idempotent). -->
+  <Target Name="EnsureDevPostgres"
+          BeforeTargets="Build"
+          Condition="'$(DesignTimeBuild)' != 'true'
+                     And '$(BuildingInsideVisualStudio)' == 'true'
+                     And '$(SkipEnsurePostgres)' != 'true'
+                     And !$([System.String]::Copy('$(MSBuildProjectName)').EndsWith('.Tests'))">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)scripts\ensure-postgres.ps1&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)" />
+  </Target>
+</Project>
