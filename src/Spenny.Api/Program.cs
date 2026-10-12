@@ -1,9 +1,10 @@
 // Spenny Web API entry point: per-IP rate limiting on /api, optional PostgreSQL (EF Core), dev-only CORS for the local SPA.
-// Domain routes stay anonymous until in-app auth ships; edge protection per docs/adr/0001.
+// Anonymous health + rate-limited /api; domain routes require auth per ADR 0003.
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Spenny.Api;
+using Spenny.Api.Auth;
 using Spenny.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +39,12 @@ builder.Services.AddOptions<RateLimiterOptions>()
     });
 
 builder.Services.AddSpennyDatabase(builder.Configuration);
+if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString(DatabaseBootstrap.ConnectionStringName)))
+{
+    builder.Services.AddSpennyAuth(builder.Configuration);
+}
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
 {
@@ -45,7 +52,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:5173")
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -63,22 +71,31 @@ else
 }
 app.UseRateLimiter();
 
+if (app.Services.IsAuthConfigured())
+{
+    app.UseAuthentication();
+}
+
+app.UseAuthorization();
+
 var api = app.MapGroup("/api").RequireRateLimiting(apiRateLimitPolicy);
 
-// Deliberately anonymous: exposes only the server time until edge protection is configured.
-api.MapGet("/time", () =>
+if (app.Services.IsAuthConfigured())
 {
-    var utc = DateTimeOffset.UtcNow;
-    var local = DateTimeOffset.Now;
-    return Results.Ok(new
-    {
-        utc = utc.ToString("O"),
-        local = local.ToString("O"),
-        timeZoneId = TimeZoneInfo.Local.Id,
-    });
-})
-.AllowAnonymous()
-.WithName("GetServerTime");
+    api.MapSpennyAuthEndpoints();
+}
+
+api.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+    .AllowAnonymous()
+    .WithName("GetHealth");
+
+if (app.Services.IsAuthConfigured())
+{
+    // Placeholder for Dashboard/Spending month APIs — requires verified local or Google session.
+    api.MapGet("/domain/access-check", () => Results.Ok(new { domain = "ready" }))
+        .RequireAuthorization(DomainAccessAuthorization.PolicyName)
+        .WithName("DomainAccessCheck");
+}
 
 app.Run();
 

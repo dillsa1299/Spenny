@@ -2,8 +2,9 @@
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import type { ReactNode } from 'react'
-import { spennyTheme } from '@/theme/theme'
+import { AuthProvider } from '@/auth/AuthContext'
 import { SmoothScrollProvider } from '@/providers/SmoothScrollProvider'
+import { spennyTheme } from '@/theme/theme'
 
 type AppProvidersProps = {
   children: ReactNode
@@ -13,7 +14,9 @@ export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ThemeProvider theme={spennyTheme}>
       <CssBaseline />
-      <SmoothScrollProvider>{children}</SmoothScrollProvider>
+      <AuthProvider>
+        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+      </AuthProvider>
     </ThemeProvider>
   )
 }
