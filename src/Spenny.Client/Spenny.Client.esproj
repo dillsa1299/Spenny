@@ -1,0 +1,12 @@
+<!--
+  Visual Studio JavaScript project: runs the Vite dev server via npm when started from a multi-project launch profile.
+  Requires the "Node.js development" workload (JavaScript/TypeScript) in Visual Studio 2022 17.5+.
+-->
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.2752196">
+  <PropertyGroup>
+    <StartupCommand>npm run dev</StartupCommand>
+    <PublishCommand>npm run build</PublishCommand>
+    <ShouldRunBuildScript>false</ShouldRunBuildScript>
+    <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
+  </PropertyGroup>
+</Project>

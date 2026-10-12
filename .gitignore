@@ -38,6 +38,11 @@ ScaffoldingReadMe.txt
 
 # dotenv environment variables file
 .env
+compose/.env
+
+# Visual Studio
+.vs/
+*.csproj.user
 
 # Others
 ~$*
