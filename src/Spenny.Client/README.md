@@ -18,10 +18,11 @@ Ensure the API is running at `VITE_API_BASE_URL` (default `http://localhost:5050
 
 | Path | Purpose |
 |------|---------|
-| `/` | Landing |
-| `/time` | Calls `GET /api/time` and displays the server time |
+| `/` | Landing (guests) |
+| `/dashboard` | Signed-in home (after email verification) |
+| `/sign-in`, `/sign-up` | Local account flows |
 
-There is no in-app login; access control is deferred to the hosting edge (see [ADR 0001](../../docs/adr/0001-defer-access-control-to-hosting-edge.md)).
+Auth uses cookie sessions against `/api/auth/*` when the API has PostgreSQL configured — see [ADR 0003](../../docs/adr/0003-in-app-authentication-for-user-data.md).
 
 ## Scripts
 

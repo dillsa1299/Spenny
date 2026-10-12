@@ -2,7 +2,7 @@
 
 Spenny — a simple, quirky bill tracker. This repository contains the **React** client (`src/Spenny.Client/`) and the **ASP.NET Core** API (`src/Spenny.Api/`).
 
-There is no in-app authentication yet. Access control is deferred to the hosting edge at deployment — see [ADR 0001](docs/adr/0001-defer-access-control-to-hosting-edge.md). Do not deploy publicly with real data until that is in place.
+**Local accounts** (register, email verification, sign-in, password reset) use ASP.NET Core Identity with cookie sessions when PostgreSQL is configured — see [ADR 0003](docs/adr/0003-in-app-authentication-for-user-data.md). Domain APIs (Dashboard, Spending) require a verified session. [ADR 0001](docs/adr/0001-defer-access-control-to-hosting-edge.md) still applies to anonymous routes and edge rate limiting.
 
 ## Prerequisites
 
@@ -30,7 +30,7 @@ Requires the **Node.js development** / JavaScript project workload so `Spenny.Cl
 dotnet run --project src/Spenny.Api
 ```
 
-HTTP: `http://localhost:5050` — `GET /api/time` returns the server time. Requests are rate limited per IP (HTTP 429 when exceeded; see `RateLimit` in `appsettings.json`).
+HTTP: `http://localhost:5050` — `GET /api/health` for liveness. With Postgres configured, auth routes live under `/api/auth/*` (see `Auth` and `Email` in `appsettings.json`; verification links are logged to the API console when SMTP is unset). Requests are rate limited per IP (HTTP 429 when exceeded; see `RateLimit` in `appsettings.json`).
 
 ### Client
 
@@ -41,7 +41,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` (landing). Server time test: `http://localhost:5173/time`.
+Open `http://localhost:5173` (landing).
 
 ### Database (PostgreSQL)
 

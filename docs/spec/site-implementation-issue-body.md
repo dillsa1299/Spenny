@@ -4,7 +4,7 @@ Part of #3. Product behaviour is defined in `docs/spec/site-functional.md`.
 
 Younger users struggle to see, at a glance, how much of their money is still committed to bills and planned spending for the rest of the month. Spreadsheets and bank apps feel heavy or “too bank-y.” Spenny needs a simple, mobile-first experience: scheduled **Spending** (outflows), a month **burndown** view, and clear “what’s still ahead” — without manual payment tracking or overdue anxiety.
 
-The codebase today is a React client and anonymous time API with no users, no PostgreSQL domain, and edge-deferred auth (ADR 0001). Issue #3 produced the functional spec; this ticket implements v1.
+The codebase today is a React client and ASP.NET Core API (health, auth, and domain routes) with PostgreSQL and in-app authentication (ADR 0003). Issue #3 produced the functional spec; this ticket implements v1.
 
 ## Solution
 
@@ -102,7 +102,7 @@ Burndown: start at sum(amounts); for each effective date in month ascending, sub
 **Primary test seam (proposed):** `SpendingMonthProjection` — a single domain module that takes series + exceptions + `(year, month)` + `asOfDate` + time zone and returns occurrences, burndown steps, and upcoming ids. Pure logic, no HTTP or database.
 
 - **What makes a good test:** Assert inputs/outputs only (dates, amounts, lists). Use fixed `asOfDate` and fixture series/exception graphs. Cover weekend rounding, weekly/monthly/yearly spanning month edges, exceptions (edit one, delete one), backfill in past dates, empty month, and burndown/today marker preconditions.
-- **Modules tested:** Projection module first and exhaustively; thin API integration tests afterward for auth (401/403), tenant isolation (user A cannot read user B), and one happy-path CRUD smoke per endpoint group (pattern from existing `TimeEndpointTests` + `SpennyWebApplicationFactory`).
+- **Modules tested:** Projection module first and exhaustively; thin API integration tests afterward for auth (401/403), tenant isolation (user A cannot read user B), and one happy-path CRUD smoke per endpoint group (pattern from existing `HealthEndpointTests` + `SpennyWebApplicationFactory`).
 - **Prior art:** `Spenny.Api.Tests` integration style with factory and HTTP assertions; CI Postgres per ADR 0002 for migration/smoke when EF is wired.
 
 Client UI and chart rendering are out of scope for unit tests in v1 except optional snapshot/smoke; correctness lives in projection + API contract tests.

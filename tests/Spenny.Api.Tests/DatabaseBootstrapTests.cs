@@ -19,12 +19,12 @@ public class DatabaseBootstrapTests
     }
 
     [Fact]
-    public async Task Host_WithoutConnectionString_StillServesTime()
+    public async Task Host_WithoutConnectionString_StillServesHealth()
     {
         await using var factory = new WebApplicationFactory<Program>();
         using var client = factory.CreateClient();
 
-        var response = await client.GetAsync("/api/time");
+        var response = await client.GetAsync("/api/health");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }

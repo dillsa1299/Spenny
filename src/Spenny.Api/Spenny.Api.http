@@ -1,6 +1,6 @@
 @Spenny.Api_HostAddress = http://localhost:5050
 
-GET {{Spenny.Api_HostAddress}}/weatherforecast/
+GET {{Spenny.Api_HostAddress}}/api/health
 Accept: application/json
 
 ###

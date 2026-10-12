@@ -31,7 +31,7 @@ cp compose/.env.example compose/.env
 docker compose -f compose/docker-compose.yml -f compose/docker-compose.ci.yml --env-file compose/.env up -d --build
 ```
 
-- API: `http://localhost:5050/api/time`
+- API: `http://localhost:5050/api/health`
 - Client (nginx): `http://localhost:8080/`
 
 Tear down:
