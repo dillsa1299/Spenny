@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Spenny.Api/Spenny.Api.csproj" />
+    <Project Path="src/Spenny.Client/Spenny.Client.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Spenny.Api.Tests/Spenny.Api.Tests.csproj" />
+  </Folder>
+</Solution>

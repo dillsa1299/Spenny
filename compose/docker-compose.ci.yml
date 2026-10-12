@@ -1,0 +1,25 @@
+# CI overlay: build and run API + static client with the base postgres service.
+# docker compose -f compose/docker-compose.yml -f compose/docker-compose.ci.yml up -d --build
+services:
+  api:
+    build:
+      context: ../src/Spenny.Api
+      dockerfile: Dockerfile
+    ports:
+      - "5050:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  client:
+    build:
+      context: ../src/Spenny.Client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:5050
+    ports:
+      - "8080:80"
+    depends_on:
+      - api

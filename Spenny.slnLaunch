@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "Spenny (API + Client)",
+    "Projects": [
+      {
+        "Path": "src\\Spenny.Api\\Spenny.Api.csproj",
+        "Action": "Start",
+        "DebugTarget": "Spenny.FullStack"
+      },
+      {
+        "Path": "src\\Spenny.Client\\Spenny.Client.esproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

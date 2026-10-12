@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: src/Spenny.Client/package-lock.json
+
+      - name: dotnet test
+        run: dotnet test
+
+      - name: Client build and lint
+        working-directory: src/Spenny.Client
+        run: |
+          npm ci
+          npm run build
+          npm run lint
+
+  compose-smoke:
+    runs-on: ubuntu-24.04
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Prepare compose environment
+        run: cp compose/.env.example compose/.env
+
+      - name: Start full stack
+        run: docker compose -f compose/docker-compose.yml -f compose/docker-compose.ci.yml --env-file compose/.env up -d --build
+
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:5050/api/time; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API did not become ready in time"
+          docker compose -f compose/docker-compose.yml -f compose/docker-compose.ci.yml --env-file compose/.env logs
+          exit 1
+
+      - name: Smoke client
+        run: curl -sf http://localhost:8080/
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f compose/docker-compose.yml -f compose/docker-compose.ci.yml --env-file compose/.env down -v
