@@ -19,9 +19,13 @@ Cursor also discovers `.agents/skills/`; this repo standardizes on **`.cursor/sk
 
 Use the **`author-agent-skills`** skill in this folder for step-by-step authoring in Cursor.
 
+## Matt Pocock skills
+
+Installed from [mattpocock/skills](https://github.com/mattpocock/skills) via `npx skills add mattpocock/skills -a cursor -y` (see `skills-lock.json`). Repo config for Matt Pocock skills lives in **`docs/agents/`** (issue tracker, triage labels, domain docs); see **`AGENTS.md`**.
+
 ## Install skills from elsewhere
 
-- [skills.sh](https://skills.sh): `npx skills add <owner/repo> -a cursor -s <skill> -y`
+- [skills.sh](https://skills.sh): `npx skills add <owner/repo> -a cursor -y`
 - Graphify: `graphify install --platform agents --project`
 - Copy a skill folder into `.cursor/skills/` and commit.
 

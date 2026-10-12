@@ -14,7 +14,9 @@ There is no in-app authentication yet. Access control is deferred to the hosting
 
 1. Open **`Spenny.slnx`** in Visual Studio 2022 (17.11+ recommended for shared multi-project launch).
 2. In the toolbar startup dropdown, choose **`Spenny (API + Client)`**.
-3. Press **F5** — starts the Vite dev server and the API (debugger attaches to **Spenny.Api**). The client's `.vscode/launch.json` opens `http://localhost:5173` in Chrome or Edge, depending on the browser selected in the toolbar.
+3. Press **F5** — ensures **PostgreSQL** is running in Docker (Compose), then starts the Vite dev server and the API (debugger attaches to **Spenny.Api**). The client's `.vscode/launch.json` opens `http://localhost:5173` in Chrome or Edge, depending on the browser selected in the toolbar.
+
+Requires **Docker Desktop** running. The first F5 may take longer while the Postgres image starts. Connection string is set on API launch profiles in `Properties/launchSettings.json` (port **5433**, matching `compose/.env.example`); override with user secrets if your `compose/.env` differs.
 
 If the profile is missing, enable **Tools → Options → Preview Features → Enable Multi Launch Profiles**, then reopen the solution. The shared profile is in [`Spenny.slnLaunch`](Spenny.slnLaunch).
 
@@ -43,14 +45,20 @@ Open `http://localhost:5173` (landing). Server time test: `http://localhost:5173
 
 ### Database (PostgreSQL)
 
-For future persistence, start Postgres in Docker (apps still run on the host):
+Start Postgres in Docker (API and Vite still run on the host):
 
 ```bash
 cp compose/.env.example compose/.env
 docker compose -f compose/docker-compose.yml --env-file compose/.env up -d
 ```
 
-See [compose/README.md](compose/README.md). CI builds the **full stack** (API + client + Postgres) via `docker-compose.ci.yml`; see [.github/workflows/ci.yml](.github/workflows/ci.yml).
+Set the API connection string (user secrets or env), matching `compose/.env`:
+
+```bash
+dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5433;Database=spenny;Username=spenny;Password=YOUR_PASSWORD_FROM_ENV" --project src/Spenny.Api
+```
+
+On startup the API applies pending EF Core migrations when `ConnectionStrings:Default` is set. See [compose/README.md](compose/README.md). CI builds the **full stack** (API + client + Postgres) via `docker-compose.ci.yml`; see [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 ### Tests and build
 
