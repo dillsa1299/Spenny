@@ -38,4 +38,19 @@ export const spennyTheme = createTheme({
   shape: {
     borderRadius: 12,
   },
+  components: {
+    MuiOutlinedInput: {
+      styleOverrides: {
+        input: {
+          // Browsers force a light autofill background; inset shadow matches dark paper.
+          '&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus': {
+            WebkitBoxShadow: '0 0 0 100px #161b22 inset',
+            WebkitTextFillColor: '#e6edf3',
+            caretColor: '#e6edf3',
+            transition: 'background-color 5000s ease-in-out 0s',
+          },
+        },
+      },
+    },
+  },
 })

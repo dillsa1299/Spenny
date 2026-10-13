@@ -4,11 +4,18 @@ $ErrorActionPreference = 'Stop'
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $composeFile = Join-Path $repoRoot 'compose\docker-compose.yml'
-$envFile = Join-Path $repoRoot 'compose\.env'
+$envFile = Join-Path $repoRoot '.env'
 
 if (-not (Test-Path $envFile)) {
-    Write-Host 'ensure-postgres: compose/.env missing; copying from .env.example'
-    Copy-Item (Join-Path $repoRoot 'compose\.env.example') $envFile
+    $legacyEnv = Join-Path $repoRoot 'compose\.env'
+    if (Test-Path $legacyEnv) {
+        Write-Host 'ensure-postgres: migrating compose/.env to repo-root .env'
+        Copy-Item $legacyEnv $envFile
+    }
+    else {
+        Write-Host 'ensure-postgres: .env missing; copying from .env.example'
+        Copy-Item (Join-Path $repoRoot '.env.example') $envFile
+    }
 }
 
 $running = docker inspect -f '{{.State.Running}}' spenny-postgres 2>$null

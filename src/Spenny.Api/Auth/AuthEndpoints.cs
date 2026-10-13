@@ -58,10 +58,13 @@ public static class AuthEndpoints
             return Results.BadRequest(new { message = validationError });
         }
 
-        var existing = await userManager.FindByEmailAsync(request.Email);
+        var existing = await userManager.FindByEmailAsync(request.Email.Trim());
         if (existing is not null)
         {
-            return Results.BadRequest(new { message = "An account with this email already exists." });
+            var message = existing.AuthProvider == AuthProviderKind.Google
+                ? "This email is already registered with Google. Sign in with Google instead."
+                : "An account with this email already exists.";
+            return Results.BadRequest(new { message });
         }
 
         var user = new SpennyUser
@@ -119,7 +122,25 @@ public static class AuthEndpoints
         }
 
         var user = await userManager.FindByEmailAsync(request.Email.Trim());
-        if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
+        if (user is null)
+        {
+            return Results.Json(
+                new { code = "invalid_credentials", message = "Email or password is incorrect." },
+                statusCode: StatusCodes.Status401Unauthorized);
+        }
+
+        if (user.AuthProvider == AuthProviderKind.Google)
+        {
+            return Results.Json(
+                new
+                {
+                    code = "use_google",
+                    message = "This email uses Google sign-in. Continue with Google instead.",
+                },
+                statusCode: StatusCodes.Status401Unauthorized);
+        }
+
+        if (!await userManager.CheckPasswordAsync(user, request.Password))
         {
             return Results.Json(
                 new { code = "invalid_credentials", message = "Email or password is incorrect." },
@@ -192,7 +213,7 @@ public static class AuthEndpoints
         }
 
         var user = await userManager.FindByEmailAsync(request.Email.Trim());
-        if (user is not null && !user.EmailConfirmed)
+        if (user is { AuthProvider: AuthProviderKind.Local, EmailConfirmed: false })
         {
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             var link = BuildSpaLink(
@@ -263,7 +284,7 @@ public static class AuthEndpoints
         }
 
         var user = await userManager.FindByEmailAsync(request.Email.Trim());
-        if (user is not null && user.AuthProvider == AuthProviderKind.Local)
+        if (user is { AuthProvider: AuthProviderKind.Local })
         {
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             var link = BuildSpaLink(

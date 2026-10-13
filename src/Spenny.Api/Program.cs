@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Spenny.Api;
 using Spenny.Api.Auth;
+using Spenny.Api.Configuration;
 using Spenny.Api.Data;
+
+EnvFileBootstrap.LoadForCurrentProcess();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +86,7 @@ var api = app.MapGroup("/api").RequireRateLimiting(apiRateLimitPolicy);
 if (app.Services.IsAuthConfigured())
 {
     api.MapSpennyAuthEndpoints();
+    api.MapGoogleAuthEndpoints();
 }
 
 api.MapGet("/health", () => Results.Ok(new { status = "ok" }))

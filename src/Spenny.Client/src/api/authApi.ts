@@ -14,6 +14,24 @@ export type SessionState =
   | { authenticated: false }
   | { authenticated: true; user: SessionUser; domainAccess: boolean }
 
+export type AuthProviders = {
+  google: boolean
+}
+
+export async function fetchAuthProviders(): Promise<AuthProviders> {
+  const response = await apiFetch('/api/auth/providers')
+  if (!response.ok) {
+    throw new Error(await readApiError(response))
+  }
+  return (await response.json()) as AuthProviders
+}
+
+export function startGoogleSignIn(returnPath = '/dashboard'): void {
+  const path = returnPath.startsWith('/') ? returnPath : `/${returnPath}`
+  const url = `/api/auth/google?returnUrl=${encodeURIComponent(path)}`
+  window.location.assign(url)
+}
+
 export async function fetchSession(): Promise<SessionState> {
   const response = await apiFetch('/api/auth/session')
   if (!response.ok) {

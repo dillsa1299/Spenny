@@ -4,10 +4,11 @@ import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { useState } from 'react'
-import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
-import { loginLocal, resendVerification } from '@/api/authApi'
+import { useEffect, useState } from 'react'
+import { Link as RouterLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { fetchAuthProviders, loginLocal, resendVerification } from '@/api/authApi'
 import { useAuth } from '@/auth/AuthContext'
+import { GoogleSignInButton } from '@/components/GoogleSignInButton'
 import { PressableButton } from '@/components/PressableButton'
 import { AuthFormLayout } from '@/pages/auth/AuthFormLayout'
 
@@ -15,14 +16,24 @@ export function SignInPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { setAuthenticatedUser, refresh } = useAuth()
+  const [googleEnabled, setGoogleEnabled] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
+  const [searchParams] = useSearchParams()
 
   const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
+
+  useEffect(() => {
+    fetchAuthProviders()
+      .then((providers) => setGoogleEnabled(providers.google))
+      .catch(() => setGoogleEnabled(false))
+  }, [])
+
+  const googleError = searchParams.get('google_error')
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -64,7 +75,14 @@ export function SignInPage() {
   }
 
   return (
-    <AuthFormLayout title="Sign in" subtitle="Use your email and password.">
+    <AuthFormLayout title="Sign in" subtitle="Use Google or your email and password.">
+      <Stack spacing={2}>
+        {googleError === 'email_in_use' ? (
+          <Alert severity="error">That email already has a password account. Sign in with email and password.</Alert>
+        ) : googleError ? (
+          <Alert severity="error">Google sign-in did not complete. Try again or use your password.</Alert>
+        ) : null}
+        {googleEnabled ? <GoogleSignInButton returnPath={from} /> : null}
       <Stack component="form" spacing={2} onSubmit={onSubmit}>
         {error ? <Alert severity="error">{error}</Alert> : null}
         {info ? <Alert severity="success">{info}</Alert> : null}
@@ -101,6 +119,7 @@ export function SignInPage() {
             Create account
           </Link>
         </Typography>
+      </Stack>
       </Stack>
     </AuthFormLayout>
   )

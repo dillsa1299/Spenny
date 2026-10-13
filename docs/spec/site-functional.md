@@ -125,7 +125,7 @@ Existing client motion stack (e.g. Lenis smooth scroll, GSAP where appropriate) 
 - **Sign in with Google** (OAuth).
 - **Local account:** email + password + **display name** (required at sign-up).
 
-**No account linking** in v1: a Google identity and a local identity are separate accounts even if the email matches.
+**No account linking** in v1: each email may belong to **either** a Google account **or** a local account, not both.
 
 ### 5.2 Local email verification
 

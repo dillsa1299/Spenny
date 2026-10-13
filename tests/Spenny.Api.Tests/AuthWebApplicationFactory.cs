@@ -12,15 +12,23 @@ namespace Spenny.Api.Tests;
 
 public sealed class AuthWebApplicationFactory : WebApplicationFactory<Program>, IDisposable
 {
-    private readonly SqliteConnection _connection = new("DataSource=spenny-auth-tests;Mode=Memory;Cache=Shared");
+    private readonly SqliteConnection _connection = new($"DataSource=spenny-auth-{Guid.NewGuid():N};Mode=Memory;Cache=Shared");
+    private readonly bool _googleConfigured;
 
-    public AuthWebApplicationFactory()
+    public AuthWebApplicationFactory(bool googleConfigured = false)
     {
+        _googleConfigured = googleConfigured;
         _connection.Open();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        if (_googleConfigured)
+        {
+            builder.UseSetting("Authentication:Google:ClientId", "test-client-id");
+            builder.UseSetting("Authentication:Google:ClientSecret", "test-client-secret");
+        }
+
         builder.UseSetting("RateLimit:PermitLimit", "1000");
         builder.UseSetting("RateLimit:WindowSeconds", "60");
         builder.UseSetting($"ConnectionStrings:{DatabaseBootstrap.ConnectionStringName}", string.Empty);

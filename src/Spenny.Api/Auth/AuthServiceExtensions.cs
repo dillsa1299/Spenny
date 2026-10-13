@@ -1,4 +1,5 @@
-// Registers Identity, cookies, email, and domain authorization when a database connection is available.
+// Registers Identity, cookies, email, optional Google OAuth, and domain authorization when a database is available.
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Spenny.Api.Data;
 
@@ -40,7 +41,11 @@ public static class AuthServiceExtensions
             .AddSignInManager()
             .AddDefaultTokenProviders();
 
-        services.AddAuthentication(IdentityConstants.ApplicationScheme)
+        var authentication = services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            })
             .AddCookie(IdentityConstants.ApplicationScheme, options =>
             {
                 options.Cookie.Name = AuthCookieName;
@@ -60,6 +65,30 @@ public static class AuthServiceExtensions
                     return Task.CompletedTask;
                 };
             });
+
+        var googleSettings = configuration.GetSection(GoogleAuthSettings.SectionName).Get<GoogleAuthSettings>();
+        if (googleSettings?.IsConfigured == true)
+        {
+            services.Configure<GoogleAuthSettings>(configuration.GetSection(GoogleAuthSettings.SectionName));
+
+            authentication
+                .AddCookie(IdentityConstants.ExternalScheme, options =>
+                {
+                    options.Cookie.Name = "spenny.auth.external";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                })
+                .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+                {
+                    options.ClientId = googleSettings.ClientId!;
+                    options.ClientSecret = googleSettings.ClientSecret!;
+                    // Must sit under /api so the Vite dev proxy forwards Google's redirect to the API.
+                    options.CallbackPath = GoogleOAuthUrls.CallbackPath;
+                });
+
+            services.AddSingleton<GoogleAuthServicesRegistered>();
+        }
 
         services.AddDomainAccessAuthorization();
 
