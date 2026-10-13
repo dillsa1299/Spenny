@@ -4,19 +4,27 @@ import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import { registerLocal } from '@/api/authApi'
+import { fetchAuthProviders, registerLocal } from '@/api/authApi'
+import { GoogleSignInButton } from '@/components/GoogleSignInButton'
 import { PressableButton } from '@/components/PressableButton'
 import { AuthFormLayout } from '@/pages/auth/AuthFormLayout'
 
 export function SignUpPage() {
   const navigate = useNavigate()
+  const [googleEnabled, setGoogleEnabled] = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    fetchAuthProviders()
+      .then((providers) => setGoogleEnabled(providers.google))
+      .catch(() => setGoogleEnabled(false))
+  }, [])
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -33,7 +41,9 @@ export function SignUpPage() {
   }
 
   return (
-    <AuthFormLayout title="Join Spenny" subtitle="At least 8 characters for your password.">
+    <AuthFormLayout title="Join Spenny" subtitle="Use Google or create a local account.">
+      <Stack spacing={2}>
+        {googleEnabled ? <GoogleSignInButton returnPath="/dashboard" /> : null}
       <Stack component="form" spacing={2} onSubmit={onSubmit}>
         {error ? <Alert severity="error">{error}</Alert> : null}
         <TextField
@@ -69,6 +79,7 @@ export function SignUpPage() {
             Sign in
           </Link>
         </Typography>
+      </Stack>
       </Stack>
     </AuthFormLayout>
   )

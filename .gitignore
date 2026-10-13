@@ -36,9 +36,10 @@ ScaffoldingReadMe.txt
 # NuGet Symbol Packages
 *.snupkg
 
-# dotenv environment variables file
+# dotenv environment variables file (see repo-root .env.example)
 .env
-compose/.env
+.env.local
+src/Spenny.Client/.env.local
 
 # Visual Studio
 .vs/

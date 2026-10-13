@@ -10,13 +10,29 @@ Spenny — a simple, quirky bill tracker. This repository contains the **React**
 - [Node.js](https://nodejs.org/) 20+ (for the Vite client)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (optional, for PostgreSQL via Compose)
 
+## Configuration
+
+All local settings live in one **repo-root** file:
+
+```bash
+cp .env.example .env   # Windows: copy .env.example .env
+```
+
+| Consumer | How it reads `.env` |
+|----------|---------------------|
+| **API** | Loaded at startup (`EnvFileBootstrap`) into environment variables (`ConnectionStrings__Default`, `Auth__*`, `Authentication__Google__*`, `Email__*`, …) |
+| **Vite client** | `envDir` points at the repo root (`VITE_*`, `SPENNY_API_HTTP_URL` for the dev proxy) |
+| **Docker Compose** | `docker compose … --env-file .env` (Postgres credentials and port) |
+
+Do not commit `.env`. Use `.env.local` for optional personal overrides (gitignored).
+
 ## Visual Studio (one-click run/debug)
 
 1. Open **`Spenny.slnx`** in Visual Studio 2022 (17.11+ recommended for shared multi-project launch).
 2. In the toolbar startup dropdown, choose **`Spenny (API + Client)`**.
 3. Press **F5** — ensures **PostgreSQL** is running in Docker (Compose), then starts the Vite dev server and the API (debugger attaches to **Spenny.Api**). The client's `.vscode/launch.json` opens `http://localhost:5173` in Chrome or Edge, depending on the browser selected in the toolbar.
 
-Requires **Docker Desktop** running. The first F5 may take longer while the Postgres image starts. Connection string is set on API launch profiles in `Properties/launchSettings.json` (port **5433**, matching `compose/.env.example`); override with user secrets if your `compose/.env` differs.
+Requires **Docker Desktop** running and a repo-root **`.env`** (F5 copies from `.env.example` when Postgres is started if `.env` is missing). Postgres host port defaults to **5433** (`POSTGRES_PORT`).
 
 If the profile is missing, enable **Tools → Options → Preview Features → Enable Multi Launch Profiles**, then reopen the solution. The shared profile is in [`Spenny.slnLaunch`](Spenny.slnLaunch).
 
@@ -36,29 +52,30 @@ HTTP: `http://localhost:5050` — `GET /api/health` for liveness. With Postgres 
 
 ```bash
 cd src/Spenny.Client
-cp .env.example .env.local   # Windows: copy .env.example .env.local
 npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` (landing).
+Open `http://localhost:5173` (landing). With an empty `VITE_API_BASE_URL` in `.env`, the dev server proxies `/api` to `SPENNY_API_HTTP_URL` (default `http://127.0.0.1:5050`).
 
 ### Database (PostgreSQL)
 
 Start Postgres in Docker (API and Vite still run on the host):
 
 ```bash
-cp compose/.env.example compose/.env
-docker compose -f compose/docker-compose.yml --env-file compose/.env up -d
+docker compose -f compose/docker-compose.yml --env-file .env up -d
 ```
 
-Set the API connection string (user secrets or env), matching `compose/.env`:
+**Google sign-in** (optional): set in `.env`:
 
-```bash
-dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5433;Database=spenny;Username=spenny;Password=YOUR_PASSWORD_FROM_ENV" --project src/Spenny.Api
+```env
+Authentication__Google__ClientId=your-client-id
+Authentication__Google__ClientSecret=your-client-secret
 ```
 
-On startup the API applies pending EF Core migrations when `ConnectionStrings:Default` is set. See [compose/README.md](compose/README.md). CI builds the **full stack** (API + client + Postgres) via `docker-compose.ci.yml`; see [.github/workflows/ci.yml](.github/workflows/ci.yml).
+Register an OAuth client in [Google Cloud Console](https://console.cloud.google.com/) with redirect URI `http://localhost:5173/api/auth/google/callback` (Vite dev proxy origin).
+
+The API builds `ConnectionStrings__Default` from `POSTGRES_*` when that connection string is not set explicitly. On startup the API applies pending EF Core migrations when the connection string is configured. See [compose/README.md](compose/README.md). CI builds the **full stack** (API + client + Postgres) via `docker-compose.ci.yml`; see [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 ### Tests and build
 

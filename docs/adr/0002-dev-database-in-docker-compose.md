@@ -20,6 +20,6 @@ API and client Dockerfiles exist for CI and future deploy; they do not replace h
 
 ## Consequences
 
-- `compose/.env` holds database credentials and must not be committed.
+- Repo-root `.env` (from `.env.example`) holds database and local app credentials and must not be committed.
 - When EF Core is introduced, connection strings differ for host (`localhost`) vs in-container (`postgres` service name).
 - Edge access control ([ADR 0001](0001-defer-access-control-to-hosting-edge.md)) still applies before public deploy with real data.
