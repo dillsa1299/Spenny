@@ -36,6 +36,9 @@ ScaffoldingReadMe.txt
 # NuGet Symbol Packages
 *.snupkg
 
+# graphify — local knowledge graph (regenerate: python -m graphify update .)
+graphify-out/
+
 # dotenv environment variables file (see repo-root .env.example)
 .env
 .env.local
