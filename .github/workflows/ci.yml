@@ -33,6 +33,7 @@ jobs:
           npm ci
           npm run build
           npm run lint
+          npm test
 
   compose-smoke:
     runs-on: ubuntu-24.04

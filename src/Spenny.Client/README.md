@@ -19,7 +19,10 @@ Vite loads environment variables from the **repository root** (`envDir` in `vite
 | Path | Purpose |
 |------|---------|
 | `/` | Landing (guests) |
-| `/dashboard` | Signed-in home (after email verification) |
+| `/dashboard` | Signed-in home (after email verification); shares month with Spending |
+| `/spending` | Spending list (placeholder until #12) |
+| `/income` | Coming soon teaser |
+| `/profile` | Profile stub (sign out) |
 | `/sign-in`, `/sign-up` | Local and Google sign-in (Google when API credentials are configured) |
 
 Auth uses cookie sessions against `/api/auth/*` when the API has PostgreSQL configured — see [ADR 0003](../../docs/adr/0003-in-app-authentication-for-user-data.md).

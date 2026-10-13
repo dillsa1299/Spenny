@@ -1,23 +1,22 @@
-// Authenticated landing stub until Dashboard burndown ships (#5 follow-ups).
+// Authenticated landing stub until Dashboard burndown ships (#12).
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useAuth } from '@/auth/AuthContext'
-import { PressableButton } from '@/components/PressableButton'
+import { MonthSelector } from '@/components/MonthSelector'
 
 export function DashboardPage() {
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2.5}>
       <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
         Dashboard
       </Typography>
+      <MonthSelector />
       <Typography color="text.secondary">
-        Welcome, {user?.displayName ?? 'there'}. Month burndown and Spending lists arrive in later tickets.
+        Welcome, {user?.displayName ?? 'there'}. Month burndown and coming-up lists arrive in a later
+        ticket.
       </Typography>
-      <PressableButton variant="outlined" onClick={() => signOut()}>
-        Sign out
-      </PressableButton>
     </Stack>
   )
 }

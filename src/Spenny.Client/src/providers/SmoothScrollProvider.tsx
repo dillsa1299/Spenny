@@ -10,9 +10,15 @@ type SmoothScrollProviderProps = {
 
 /**
  * Lenis smooth scroll with GSAP ScrollTrigger sync (React Bits / GSAP-friendly setup).
+ * Skipped when the user prefers reduced motion.
  */
 export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
   useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduceMotion) {
+      return
+    }
+
     registerGsapPlugins()
 
     const lenis = new Lenis({

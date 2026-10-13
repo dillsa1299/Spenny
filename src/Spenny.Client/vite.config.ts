@@ -3,6 +3,8 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
+/// <reference types="vitest/config" />
+
 const repoRoot = path.resolve(__dirname, '../..')
 
 // https://vite.dev/config/
@@ -17,6 +19,10 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, './src'),
       },
+    },
+    test: {
+      environment: 'node',
+      include: ['src/**/*.test.ts'],
     },
     server: {
       // When VITE_API_BASE_URL is unset, the client calls same-origin /api/* and Vite forwards to Spenny.Api.
