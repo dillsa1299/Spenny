@@ -4,7 +4,7 @@ import Box from '@mui/material/Box'
 import BottomNavigation from '@mui/material/BottomNavigation'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction'
 import Container from '@mui/material/Container'
-import { LayoutDashboard, PiggyBank, TrendingUp, User } from 'lucide-react'
+import { HandCoins, LayoutDashboard, User, Wallet } from 'lucide-react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { SelectedMonthProvider } from '@/month/SelectedMonthContext'
 
@@ -36,8 +36,8 @@ type ShellTab = {
 
 const tabs: ShellTab[] = [
   { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={22} aria-hidden /> },
-  { path: '/spending', label: 'Spending', icon: <PiggyBank size={22} aria-hidden /> },
-  { path: '/income', label: 'Income', icon: <TrendingUp size={22} aria-hidden /> },
+  { path: '/spending', label: 'Spending', icon: <HandCoins size={22} aria-hidden /> },
+  { path: '/income', label: 'Income', icon: <Wallet size={22} aria-hidden /> },
   { path: '/profile', label: 'Profile', icon: <User size={22} aria-hidden /> },
 ]
 
