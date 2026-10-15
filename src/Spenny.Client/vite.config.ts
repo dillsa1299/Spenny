@@ -14,15 +14,20 @@ export default defineConfig(({ mode }) => {
 
   return {
     envDir: repoRoot,
+    esbuild: {
+      jsx: 'automatic',
+    },
     plugins: [react(), tailwindcss()],
     resolve: {
-      alias: {
-        '@': path.resolve(__dirname, './src'),
-      },
+      alias: [
+        { find: '@/test', replacement: path.resolve(__dirname, './test/support') },
+        { find: '@', replacement: path.resolve(__dirname, './src') },
+      ],
     },
     test: {
-      environment: 'node',
-      include: ['src/**/*.test.ts'],
+      environment: 'jsdom',
+      setupFiles: ['./test/support/setup.ts'],
+      include: ['test/**/*.test.{ts,tsx}'],
     },
     server: {
       // When VITE_API_BASE_URL is unset, the client calls same-origin /api/* and Vite forwards to Spenny.Api.
