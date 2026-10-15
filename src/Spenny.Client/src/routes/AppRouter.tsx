@@ -16,10 +16,10 @@ import { SignInPage } from '@/pages/auth/SignInPage'
 import { SignUpPage } from '@/pages/auth/SignUpPage'
 import { VerifyEmailPage } from '@/pages/auth/VerifyEmailPage'
 
-export function AppRouter() {
+/** Route tree shared by BrowserRouter (app) and MemoryRouter (tests). */
+export function AppRouteTree() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <>
         <Route element={<AppShell />}>
           <Route
             path="/"
@@ -46,7 +46,14 @@ export function AppRouter() {
             <Route path="/app" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Route>
-      </Routes>
+    </>
+  )
+}
+
+export function AppRouter() {
+  return (
+    <BrowserRouter>
+      <Routes>{AppRouteTree()}</Routes>
     </BrowserRouter>
   )
 }

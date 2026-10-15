@@ -32,6 +32,10 @@ Auth uses cookie sessions against `/api/auth/*` when the API has PostgreSQL conf
 - `npm run dev` — development server
 - `npm run build` — production build
 - `npm run lint` — oxlint
+- `npm test` — run Vitest unit/integration tests once (jsdom + React Testing Library)
+- `npx vitest` — watch mode while developing tests
+
+Tests live under [`test/`](./test/) mirroring [`src/`](./src/) (e.g. `src/auth/AuthContext.tsx` → `test/auth/AuthContext.test.tsx`). Shared harness: `test/support/` (`renderAppAt`, fixtures, Vitest setup). Imports use `@/test/...` → `test/support/`. `test/sourceMirror.test.ts` fails CI if a new `src` file has no mirrored test.
 
 ## React Bits
 
