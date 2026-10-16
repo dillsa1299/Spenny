@@ -1,5 +1,5 @@
 // Google OAuth client credentials bound from user secrets or environment (never committed).
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Google;
 
 public sealed class GoogleAuthSettings
 {

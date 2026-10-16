@@ -28,9 +28,10 @@ Do not commit `.env`. Use `.env.local` for optional personal overrides (gitignor
 
 ## Visual Studio (one-click run/debug)
 
-1. Open **`Spenny.slnx`** in Visual Studio 2022 (17.11+ recommended for shared multi-project launch).
-2. In the toolbar startup dropdown, choose **`Spenny (API + Client)`**.
-3. Press **F5** — ensures **PostgreSQL** is running in Docker (Compose), then starts the Vite dev server and the API (debugger attaches to **Spenny.Api**). The client's `.vscode/launch.json` opens `http://localhost:5173` in Chrome or Edge, depending on the browser selected in the toolbar.
+1. Open **`Spenny.slnx`** or **`Spenny.sln`** from the repo root in Visual Studio 2022 (17.11+ recommended for shared multi-project launch). If the solution looks empty, you opened a broken copy — use the files from this repo (see `Spenny.slnx` lists three projects under `/src/` and `/tests/`).
+2. In Solution Explorer, expand **`Spenny.Api`**: **`Auth`** (`Identity`, `Endpoints`, `Google`, …) and **`Domain`** (`Spending`, `Scheduling`, `Projection`).
+3. In the toolbar startup dropdown, choose **`Spenny (API + Client)`**.
+4. Press **F5** — ensures **PostgreSQL** is running in Docker (Compose), then starts the Vite dev server and the API (debugger attaches to **Spenny.Api**). The client's `.vscode/launch.json` opens `http://localhost:5173` in Chrome or Edge, depending on the browser selected in the toolbar.
 
 Requires **Docker Desktop** running and a repo-root **`.env`** (F5 copies from `.env.example` when Postgres is started if `.env` is missing). Postgres host port defaults to **5433** (`POSTGRES_PORT`).
 

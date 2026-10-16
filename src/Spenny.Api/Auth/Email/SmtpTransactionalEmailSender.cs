@@ -3,7 +3,9 @@ using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Options;
 
-namespace Spenny.Api.Auth;
+using Spenny.Api.Auth.Identity;
+
+namespace Spenny.Api.Auth.Email;
 
 public sealed class SmtpTransactionalEmailSender(
     IOptions<EmailSettings> emailOptions,

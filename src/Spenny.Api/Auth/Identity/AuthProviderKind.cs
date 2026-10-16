@@ -1,5 +1,5 @@
 // Distinguishes how the user authenticates (local password vs external OAuth).
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Identity;
 
 public enum AuthProviderKind
 {

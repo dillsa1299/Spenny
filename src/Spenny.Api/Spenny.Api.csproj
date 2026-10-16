@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Auth\README.md" />
+    <None Include="Domain\README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Spenny.Api.Tests" />
   </ItemGroup>
 

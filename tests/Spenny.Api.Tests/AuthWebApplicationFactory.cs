@@ -5,7 +5,8 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Spenny.Api.Auth;
+using Spenny.Api.Auth.DependencyInjection;
+using Spenny.Api.Auth.Identity;
 using Spenny.Api.Data;
 
 namespace Spenny.Api.Tests;

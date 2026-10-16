@@ -1,5 +1,7 @@
 // Development and test email sender: writes links to logs instead of SMTP (no secrets required).
-namespace Spenny.Api.Auth;
+using Spenny.Api.Auth.Identity;
+
+namespace Spenny.Api.Auth.Email;
 
 public sealed class LoggingTransactionalEmailSender(ILogger<LoggingTransactionalEmailSender> logger)
     : ITransactionalEmailSender

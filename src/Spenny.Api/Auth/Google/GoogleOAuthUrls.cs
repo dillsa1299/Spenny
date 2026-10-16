@@ -1,6 +1,6 @@
 // Google OAuth paths: CallbackPath is handled by the Google middleware and must be registered in Google Cloud;
 // CompletePath is the app endpoint the middleware redirects to after storing the external login.
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Google;
 
 public static class GoogleOAuthUrls
 {

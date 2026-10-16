@@ -1,7 +1,7 @@
 // EF Core database context for Spenny persistence (PostgreSQL) including Identity and login audit.
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Spenny.Api.Auth;
+using Spenny.Api.Auth.Identity;
 
 namespace Spenny.Api.Data;
 

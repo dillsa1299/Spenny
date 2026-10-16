@@ -1,9 +1,14 @@
 // Registers Identity, cookies, email, optional Google OAuth, and domain authorization when a database is available.
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
+using Spenny.Api.Auth.Access;
+using Spenny.Api.Auth.Email;
+using Spenny.Api.Auth.Google;
+using Spenny.Api.Auth.Identity;
+using Spenny.Api.Auth.Options;
 using Spenny.Api.Data;
 
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.DependencyInjection;
 
 public static class AuthServiceExtensions
 {

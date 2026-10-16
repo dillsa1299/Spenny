@@ -1,7 +1,7 @@
 // SMTP and sender configuration for verification and password-reset mail (secrets via env/user secrets).
 using System.ComponentModel.DataAnnotations;
 
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Email;
 
 public sealed class EmailSettings
 {

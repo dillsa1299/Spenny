@@ -4,9 +4,13 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using Spenny.Api.Auth.DependencyInjection;
+using Spenny.Api.Auth.Google;
+using Spenny.Api.Auth.Identity;
+using Spenny.Api.Auth.Options;
 using Spenny.Api.Data;
 
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Endpoints;
 
 public static class GoogleAuthEndpoints
 {

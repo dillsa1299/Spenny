@@ -1,7 +1,7 @@
 // Application user for ASP.NET Identity: profile fields and provider metadata beyond the stock IdentityUser.
 using Microsoft.AspNetCore.Identity;
 
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Identity;
 
 public sealed class SpennyUser : IdentityUser
 {
