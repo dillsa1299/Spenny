@@ -1,5 +1,5 @@
 // Records successful sign-ins for aggregate admin metrics (user id + time only).
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Identity;
 
 public sealed class LoginAuditEvent
 {

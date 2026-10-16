@@ -4,7 +4,9 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Spenny.Api;
-using Spenny.Api.Auth;
+using Spenny.Api.Auth.Access;
+using Spenny.Api.Auth.DependencyInjection;
+using Spenny.Api.Auth.Endpoints;
 using Spenny.Api.Configuration;
 using Spenny.Api.Data;
 

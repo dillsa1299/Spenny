@@ -1,8 +1,9 @@
 // Requires a signed-in user whose email is verified (local) or who signed in via Google.
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Spenny.Api.Auth.Identity;
 
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Access;
 
 public static class DomainAccessAuthorization
 {

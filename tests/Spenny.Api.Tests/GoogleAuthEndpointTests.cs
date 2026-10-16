@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Spenny.Api.Auth;
+using Spenny.Api.Auth.Identity;
 using Spenny.Api.Data;
 
 namespace Spenny.Api.Tests;

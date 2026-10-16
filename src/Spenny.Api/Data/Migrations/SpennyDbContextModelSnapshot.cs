@@ -154,7 +154,7 @@ namespace Spenny.Api.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Spenny.Api.Auth.LoginAuditEvent", b =>
+            modelBuilder.Entity("Spenny.Api.Auth.Identity.LoginAuditEvent", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -177,7 +177,7 @@ namespace Spenny.Api.Data.Migrations
                     b.ToTable("LoginAuditEvents");
                 });
 
-            modelBuilder.Entity("Spenny.Api.Auth.SpennyUser", b =>
+            modelBuilder.Entity("Spenny.Api.Auth.Identity.SpennyUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -265,7 +265,7 @@ namespace Spenny.Api.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Spenny.Api.Auth.SpennyUser", null)
+                    b.HasOne("Spenny.Api.Auth.Identity.SpennyUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -274,7 +274,7 @@ namespace Spenny.Api.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Spenny.Api.Auth.SpennyUser", null)
+                    b.HasOne("Spenny.Api.Auth.Identity.SpennyUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -289,7 +289,7 @@ namespace Spenny.Api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Spenny.Api.Auth.SpennyUser", null)
+                    b.HasOne("Spenny.Api.Auth.Identity.SpennyUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -298,7 +298,7 @@ namespace Spenny.Api.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Spenny.Api.Auth.SpennyUser", null)
+                    b.HasOne("Spenny.Api.Auth.Identity.SpennyUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

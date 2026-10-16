@@ -1,5 +1,7 @@
 // Sends account verification and password-reset messages; implementations use SMTP or dev logging.
-namespace Spenny.Api.Auth;
+using Spenny.Api.Auth.Identity;
+
+namespace Spenny.Api.Auth.Email;
 
 public interface ITransactionalEmailSender
 {

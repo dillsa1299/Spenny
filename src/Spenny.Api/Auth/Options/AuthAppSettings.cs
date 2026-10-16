@@ -1,7 +1,7 @@
 // SPA-facing auth URLs and cookie/session options bound from configuration.
 using System.ComponentModel.DataAnnotations;
 
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Options;
 
 public sealed class AuthAppSettings
 {

@@ -4,9 +4,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Spenny.Api.Auth.DependencyInjection;
+using Spenny.Api.Auth.Email;
+using Spenny.Api.Auth.Identity;
+using Spenny.Api.Auth.Options;
 using Spenny.Api.Data;
 
-namespace Spenny.Api.Auth;
+namespace Spenny.Api.Auth.Endpoints;
 
 public static class AuthEndpoints
 {
