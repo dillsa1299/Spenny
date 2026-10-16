@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Spenny.Api.Data;
 
-namespace Spenny.Api.Tests;
+namespace Spenny.Api.Tests.Data;
 
 public class DatabaseBootstrapTests
 {

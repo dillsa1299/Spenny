@@ -1,15 +1,16 @@
 // Integration tests for local account register, verification, sign-in, and domain API gating.
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Spenny.Api.Auth.Identity;
 using Spenny.Api.Data;
+using Spenny.Api.Tests.Support;
 
-namespace Spenny.Api.Tests;
+namespace Spenny.Api.Tests.Auth.Endpoints;
 
-public class LocalAuthEndpointTests
+public class AuthEndpointsTests
 {
     private const string Password = "password123";
 
