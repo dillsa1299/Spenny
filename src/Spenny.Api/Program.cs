@@ -9,6 +9,7 @@ using Spenny.Api.Auth.DependencyInjection;
 using Spenny.Api.Auth.Endpoints;
 using Spenny.Api.Configuration;
 using Spenny.Api.Data;
+using Spenny.Api.Spending;
 
 EnvFileBootstrap.LoadForCurrentProcess();
 
@@ -50,6 +51,7 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString(Databas
 }
 
 builder.Services.AddAuthorization();
+builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddCors(options =>
 {
@@ -97,10 +99,11 @@ api.MapGet("/health", () => Results.Ok(new { status = "ok" }))
 
 if (app.Services.IsAuthConfigured())
 {
-    // Placeholder for Dashboard/Spending month APIs — requires verified local or Google session.
     api.MapGet("/domain/access-check", () => Results.Ok(new { domain = "ready" }))
         .RequireAuthorization(DomainAccessAuthorization.PolicyName)
         .WithName("DomainAccessCheck");
+
+    api.MapSpendingEndpoints();
 }
 
 app.Run();

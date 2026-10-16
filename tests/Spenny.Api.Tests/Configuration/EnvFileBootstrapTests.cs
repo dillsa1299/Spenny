@@ -1,7 +1,7 @@
 // Regression tests for repo-root .env → connection string mapping.
 using Spenny.Api.Configuration;
 
-namespace Spenny.Api.Tests;
+namespace Spenny.Api.Tests.Configuration;
 
 public class EnvFileBootstrapTests
 {
