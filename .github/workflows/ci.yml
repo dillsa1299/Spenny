@@ -25,7 +25,7 @@ jobs:
           cache-dependency-path: src/Spenny.Client/package-lock.json
 
       - name: dotnet test
-        run: dotnet test
+        run: dotnet test Spenny.slnx
 
       - name: Client build and lint
         working-directory: src/Spenny.Client
