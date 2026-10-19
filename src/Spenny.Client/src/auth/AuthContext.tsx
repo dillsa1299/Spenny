@@ -17,6 +17,8 @@ type AuthContextValue = {
   domainAccess: boolean
   refresh: () => Promise<void>
   signOut: () => Promise<void>
+  /** Clears client session only (e.g. after server already signed out on account delete). */
+  clearSession: () => void
   setAuthenticatedUser: (user: SessionUser) => void
 }
 
@@ -54,10 +56,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const signOut = useCallback(async () => {
-    await apiLogout()
+  const clearSession = useCallback(() => {
     setSession({ authenticated: false })
   }, [])
+
+  const signOut = useCallback(async () => {
+    try {
+      await apiLogout()
+    } catch {
+      // Server may already have cleared the cookie (expired session, account deleted).
+    }
+    clearSession()
+  }, [clearSession])
 
   const setAuthenticatedUser = useCallback((user: SessionUser) => {
     setSession({ authenticated: true, user, domainAccess: user.emailConfirmed })
@@ -73,9 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       domainAccess,
       refresh,
       signOut,
+      clearSession,
       setAuthenticatedUser,
     }
-  }, [loading, session, refresh, signOut, setAuthenticatedUser])
+  }, [loading, session, refresh, signOut, clearSession, setAuthenticatedUser])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

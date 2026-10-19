@@ -12,6 +12,7 @@ import { AuthFormLayout } from '@/pages/auth/AuthFormLayout'
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState<string | null>(null)
+  const [devResetLink, setDevResetLink] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -19,10 +20,12 @@ export function ForgotPasswordPage() {
     event.preventDefault()
     setError(null)
     setMessage(null)
+    setDevResetLink(null)
     setSubmitting(true)
     try {
       const result = await forgotPassword(email.trim())
       setMessage(result.message)
+      setDevResetLink(result.devResetLink ?? null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Request failed.')
     } finally {
@@ -34,6 +37,14 @@ export function ForgotPasswordPage() {
     <AuthFormLayout title="Reset password">
       <Stack component="form" spacing={2} onSubmit={onSubmit}>
         {message ? <Alert severity="success">{message}</Alert> : null}
+        {devResetLink ? (
+          <Alert severity="info">
+            Local dev (no SMTP):{' '}
+            <Link href={devResetLink} underline="hover">
+              Open password reset link
+            </Link>
+          </Alert>
+        ) : null}
         {error ? <Alert severity="error">{error}</Alert> : null}
         <TextField
           label="Email"

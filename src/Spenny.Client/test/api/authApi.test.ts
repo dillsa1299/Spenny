@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiFetch } from '@/api/apiClient'
-import { loginLocal, startGoogleSignIn } from '@/api/authApi'
+import { loginLocal, startGoogleSignIn, updateDisplayName } from '@/api/authApi'
 
 vi.mock('@/api/apiClient', () => ({
   apiFetch: vi.fn(),
@@ -27,6 +27,27 @@ describe('authApi', () => {
 
     const result = await loginLocal('a@b.com', 'secret')
     expect(result).toEqual({ ok: true, user })
+  })
+
+  it('updateDisplayName PATCHes profile', async () => {
+    const user = {
+      id: '1',
+      email: 'a@b.com',
+      displayName: 'Updated',
+      emailConfirmed: true,
+      authProvider: 'Local',
+      isAdmin: false,
+    }
+    vi.mocked(apiFetch).mockResolvedValue(
+      new Response(JSON.stringify(user), { status: 200, headers: { 'Content-Type': 'application/json' } }),
+    )
+
+    const result = await updateDisplayName('Updated')
+    expect(result.displayName).toBe('Updated')
+    expect(apiFetch).toHaveBeenCalledWith('/api/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify({ displayName: 'Updated' }),
+    })
   })
 
   it('startGoogleSignIn navigates to the OAuth URL', () => {

@@ -107,7 +107,9 @@ export async function confirmEmail(userId: string, token: string): Promise<{ mes
   return (await response.json()) as { message: string }
 }
 
-export async function forgotPassword(email: string): Promise<{ message: string }> {
+export async function forgotPassword(
+  email: string,
+): Promise<{ message: string; devResetLink?: string }> {
   const response = await apiFetch('/api/auth/forgot-password', {
     method: 'POST',
     body: JSON.stringify({ email }),
@@ -115,7 +117,7 @@ export async function forgotPassword(email: string): Promise<{ message: string }
   if (!response.ok) {
     throw new Error(await readApiError(response))
   }
-  return (await response.json()) as { message: string }
+  return (await response.json()) as { message: string; devResetLink?: string }
 }
 
 export async function resetPassword(
@@ -131,4 +133,39 @@ export async function resetPassword(
     throw new Error(await readApiError(response))
   }
   return (await response.json()) as { message: string }
+}
+
+export async function updateDisplayName(displayName: string): Promise<SessionUser> {
+  const response = await apiFetch('/api/auth/profile', {
+    method: 'PATCH',
+    body: JSON.stringify({ displayName }),
+  })
+  if (!response.ok) {
+    throw new Error(await readApiError(response))
+  }
+  return (await response.json()) as SessionUser
+}
+
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ message: string }> {
+  const response = await apiFetch('/api/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  })
+  if (!response.ok) {
+    throw new Error(await readApiError(response))
+  }
+  return (await response.json()) as { message: string }
+}
+
+export async function deleteAccount(confirmation: string): Promise<void> {
+  const response = await apiFetch('/api/auth/account/delete', {
+    method: 'POST',
+    body: JSON.stringify({ confirmation }),
+  })
+  if (!response.ok) {
+    throw new Error(await readApiError(response))
+  }
 }

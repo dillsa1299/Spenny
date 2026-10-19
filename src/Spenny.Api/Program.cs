@@ -90,6 +90,7 @@ var api = app.MapGroup("/api").RequireRateLimiting(apiRateLimitPolicy);
 if (app.Services.IsAuthConfigured())
 {
     api.MapSpennyAuthEndpoints();
+    api.MapSpennyProfileEndpoints();
     api.MapGoogleAuthEndpoints();
 }
 

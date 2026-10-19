@@ -165,7 +165,7 @@ public static class AuthEndpoints
         await signInManager.SignInAsync(user, isPersistent: true);
         await RecordLoginAsync(db, user.Id, cancellationToken);
 
-        return Results.Ok(ToSessionDto(user));
+        return Results.Ok(SessionUserDto.FromUser(user));
     }
 
     private static async Task<IResult> LogoutAsync(SignInManager<SpennyUser> signInManager)
@@ -192,7 +192,7 @@ public static class AuthEndpoints
         return Results.Ok(new
         {
             authenticated = true,
-            user = ToSessionDto(user),
+            user = SessionUserDto.FromUser(user),
             domainAccess = user.AuthProvider == AuthProviderKind.Google || user.EmailConfirmed,
         });
     }
@@ -259,6 +259,11 @@ public static class AuthEndpoints
             return Results.BadRequest(new { message = "Invalid verification link." });
         }
 
+        if (user.EmailConfirmed)
+        {
+            return Results.Ok(new { message = "Email verified. You can sign in now." });
+        }
+
         var result = await userManager.ConfirmEmailAsync(user, request.Token);
         if (!result.Succeeded)
         {
@@ -274,6 +279,9 @@ public static class AuthEndpoints
         UserManager<SpennyUser> userManager,
         ITransactionalEmailSender emailSender,
         IOptions<AuthAppSettings> authOptions,
+        IOptions<EmailSettings> emailOptions,
+        IHostEnvironment environment,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         var unavailable = DatabaseUnavailable(http);
@@ -287,7 +295,10 @@ public static class AuthEndpoints
             return Results.BadRequest(new { message = "Email is required." });
         }
 
-        var user = await userManager.FindByEmailAsync(request.Email.Trim());
+        var log = loggerFactory.CreateLogger("Spenny.Auth.ForgotPassword");
+        var email = request.Email.Trim();
+        string? devResetLink = null;
+        var user = await userManager.FindByEmailAsync(email);
         if (user is { AuthProvider: AuthProviderKind.Local })
         {
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
@@ -300,11 +311,27 @@ public static class AuthEndpoints
                     ["token"] = token,
                 });
             await emailSender.SendPasswordResetAsync(user, link, cancellationToken);
+            if (environment.IsDevelopment() && string.IsNullOrWhiteSpace(emailOptions.Value.SmtpHost))
+            {
+                devResetLink = link;
+            }
+        }
+        else if (user is not null)
+        {
+            log.LogInformation(
+                "Password reset not sent for {Email}: account uses {Provider} sign-in.",
+                email,
+                user.AuthProvider);
+        }
+        else
+        {
+            log.LogInformation("Password reset not sent: no account for {Email}.", email);
         }
 
         return Results.Ok(new
         {
             message = "If an account exists for that email, password reset instructions were sent.",
+            devResetLink,
         });
     }
 
@@ -357,14 +384,6 @@ public static class AuthEndpoints
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    private static SessionUserDto ToSessionDto(SpennyUser user) => new(
-        user.Id,
-        user.Email ?? string.Empty,
-        user.DisplayName,
-        user.EmailConfirmed,
-        user.AuthProvider.ToString(),
-        user.IsAdmin);
-
     private static string BuildSpaLink(string spaBaseUrl, string path, IReadOnlyDictionary<string, string?> query)
     {
         var baseUri = spaBaseUrl.TrimEnd('/');
@@ -403,12 +422,4 @@ public static class AuthEndpoints
     public sealed record ForgotPasswordRequest(string Email);
 
     public sealed record ResetPasswordRequest(string UserId, string Token, string NewPassword);
-
-    public sealed record SessionUserDto(
-        string Id,
-        string Email,
-        string DisplayName,
-        bool EmailConfirmed,
-        string AuthProvider,
-        bool IsAdmin);
 }

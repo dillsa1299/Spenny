@@ -4,8 +4,10 @@ import Box from '@mui/material/Box'
 import BottomNavigation from '@mui/material/BottomNavigation'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction'
 import Container from '@mui/material/Container'
+import Typography from '@mui/material/Typography'
 import { HandCoins, LayoutDashboard, User, Wallet } from 'lucide-react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/auth/AuthContext'
 import { SelectedMonthProvider } from '@/month/SelectedMonthContext'
 
 const tabPressSx = {
@@ -49,6 +51,7 @@ function tabIndexForPath(pathname: string): number {
 export function AuthenticatedShell() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const tabIndex = tabIndexForPath(location.pathname)
 
   return (
@@ -68,6 +71,16 @@ export function AuthenticatedShell() {
             width: '100%',
           }}
         >
+          {user?.displayName ? (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 1.5, fontWeight: 500 }}
+              aria-label={`Signed in as ${user.displayName}`}
+            >
+              {user.displayName}
+            </Typography>
+          ) : null}
           <Outlet />
         </Container>
         <Box

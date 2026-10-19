@@ -48,6 +48,8 @@ describe('AuthenticatedShell', () => {
       expect(screen.getByRole('heading', { name: 'Dashboard page' })).toBeInTheDocument()
     })
 
+    expect(screen.getByLabelText('Signed in as Verified User')).toHaveTextContent('Verified User')
+
     await user.click(screen.getByRole('button', { name: 'Income' }))
 
     await waitFor(() => {
