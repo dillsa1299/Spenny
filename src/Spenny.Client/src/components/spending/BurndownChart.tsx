@@ -91,7 +91,10 @@ export function BurndownChart({
 
   const yMax = Math.max(monthTotal, 1)
   const lineColor = theme.palette.secondary.main
-  const axisMarkers = useMemo(() => burndownAxisMarkers(chartData.points), [chartData.points])
+  const axisMarkers = useMemo(
+    () => burndownAxisMarkers(chartData.points, monthTotal),
+    [chartData.points, monthTotal],
+  )
   const xTickValues = axisMarkers.labelDays.length > 0 ? axisMarkers.labelDays : [1]
   const yTickValues = useMemo(
     () =>

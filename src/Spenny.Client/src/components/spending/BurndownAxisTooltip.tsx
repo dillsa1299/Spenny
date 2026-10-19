@@ -3,6 +3,7 @@ import { ChartsTooltipContainer, useAxesTooltip } from '@mui/x-charts/ChartsTool
 import type { ChartsTooltipProps } from '@mui/x-charts/ChartsTooltip'
 import { BurndownDayTooltipContent } from '@/components/spending/BurndownDayTooltipContent'
 import { useBurndownTooltipContext } from '@/components/spending/BurndownTooltipContext'
+import { MONTH_START_ANCHOR_DAY } from '@/spending/burndownChartData'
 import { buildBurndownDaySummary } from '@/spending/burndownDaySummary'
 
 export function BurndownAxisTooltip(props: ChartsTooltipProps<'axis'>) {
@@ -16,7 +17,7 @@ export function BurndownAxisTooltip(props: ChartsTooltipProps<'axis'>) {
       ? Number(axisEntry.axisValue)
       : null
 
-  if (day === null || Number.isNaN(day)) {
+  if (day === null || Number.isNaN(day) || day === MONTH_START_ANCHOR_DAY) {
     return null
   }
 
@@ -26,7 +27,9 @@ export function BurndownAxisTooltip(props: ChartsTooltipProps<'axis'>) {
   return (
     <ChartsTooltipContainer
       trigger={trigger}
-      anchor="chart"
+      // Anchor to the highlighted point, not the chart box, so the tooltip sits just above the
+      // step line instead of covering the remaining-balance headline above the plot.
+      anchor="node"
       position="top"
       disablePortal={false}
       slotProps={{
