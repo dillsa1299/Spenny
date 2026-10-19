@@ -1,9 +1,11 @@
 // Integration tests for local account register, verification, sign-in, and domain API gating.
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Spenny.Api.Auth.Identity;
 using Spenny.Api.Data;
 using Spenny.Api.Tests.Support;
@@ -104,6 +106,47 @@ public class AuthEndpointsTests
     }
 
     [Fact]
+    public async Task ConfirmEmail_IsIdempotentWhenAlreadyVerified()
+    {
+        await using var factory = new AuthWebApplicationFactory();
+        using var client = factory.CreateClient();
+
+        const string email = "idempotent@example.com";
+        await RegisterAsync(client, email, "Idempotent");
+        await ConfirmEmailAsync(factory, email);
+
+        using var scope = factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<SpennyUser>>();
+        var user = await userManager.FindByEmailAsync(email);
+        Assert.NotNull(user);
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+        var confirm = await client.PostAsJsonAsync("/api/auth/confirm-email", new
+        {
+            userId = user.Id,
+            token,
+        });
+        Assert.Equal(HttpStatusCode.OK, confirm.StatusCode);
+    }
+
+    [Fact]
+    public async Task ForgotPassword_ReturnsDevResetLink_InDevelopmentWithoutSmtp()
+    {
+        await using var factory = new AuthWebApplicationFactory().WithWebHostBuilder(builder =>
+            builder.UseEnvironment(Environments.Development));
+        using var client = factory.CreateClient();
+
+        const string email = "dev-link@example.com";
+        await RegisterAsync(client, email, "Dev Link");
+
+        var forgot = await client.PostAsJsonAsync("/api/auth/forgot-password", new { email });
+        Assert.Equal(HttpStatusCode.OK, forgot.StatusCode);
+        var body = await forgot.Content.ReadFromJsonAsync<ForgotPasswordResponse>();
+        Assert.False(string.IsNullOrWhiteSpace(body?.devResetLink));
+        Assert.Contains("/reset-password", body!.devResetLink!, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ResetPassword_WorksAfterForgotPasswordFlow()
     {
         await using var factory = new AuthWebApplicationFactory();
@@ -160,4 +203,6 @@ public class AuthEndpointsTests
     private sealed record LoginErrorResponse(string code, string message);
 
     private sealed record SessionResponse(bool authenticated, bool domainAccess);
+
+    private sealed record ForgotPasswordResponse(string? devResetLink);
 }

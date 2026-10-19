@@ -5,8 +5,16 @@ export const verifiedUser: SessionUser = {
   email: 'verified@example.com',
   displayName: 'Verified User',
   emailConfirmed: true,
-  authProvider: 'local',
+  authProvider: 'Local',
   isAdmin: false,
+}
+
+export const googleUser: SessionUser = {
+  ...verifiedUser,
+  id: 'user-google',
+  email: 'google@example.com',
+  displayName: 'Google User',
+  authProvider: 'Google',
 }
 
 export const unverifiedUser: SessionUser = {
@@ -27,6 +35,12 @@ export const unverifiedSession: SessionState = {
   authenticated: true,
   user: unverifiedUser,
   domainAccess: false,
+}
+
+export const googleSession: SessionState = {
+  authenticated: true,
+  user: googleUser,
+  domainAccess: true,
 }
 
 export const guestSession: SessionState = { authenticated: false }

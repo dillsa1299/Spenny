@@ -4,6 +4,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import type { ReactNode } from 'react'
 import { AppBackground } from '@/components/AppBackground'
 import { AuthProvider } from '@/auth/AuthContext'
+import { FlashNoticeProvider } from '@/flash/FlashNoticeContext'
 import { SmoothScrollProvider } from '@/providers/SmoothScrollProvider'
 import { spennyTheme } from '@/theme/theme'
 
@@ -17,7 +18,9 @@ export function AppProviders({ children }: AppProvidersProps) {
       <CssBaseline enableColorScheme />
       <AppBackground />
       <AuthProvider>
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <FlashNoticeProvider>
+          <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        </FlashNoticeProvider>
       </AuthProvider>
     </ThemeProvider>
   )

@@ -12,6 +12,10 @@ import { GoogleSignInButton } from '@/components/GoogleSignInButton'
 import { PressableButton } from '@/components/PressableButton'
 import { AuthFormLayout } from '@/pages/auth/AuthFormLayout'
 
+type SignInLocationState = {
+  from?: string
+}
+
 export function SignInPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -24,8 +28,8 @@ export function SignInPage() {
   const [submitting, setSubmitting] = useState(false)
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
   const [searchParams] = useSearchParams()
-
-  const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
+  const locationState = location.state as SignInLocationState | null
+  const from = locationState?.from ?? '/dashboard'
 
   useEffect(() => {
     fetchAuthProviders()

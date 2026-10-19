@@ -23,6 +23,7 @@ function AuthProbe() {
 
 describe('AuthContext', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     vi.mocked(fetchSession).mockResolvedValue({ authenticated: false })
     vi.mocked(logout).mockResolvedValue(undefined)
   })
@@ -64,6 +65,28 @@ describe('AuthContext', () => {
       expect(screen.getByText('User: Verified User')).toBeInTheDocument()
     })
     expect(screen.getByText('Has domain access')).toBeInTheDocument()
+  })
+
+  it('signOut clears session when logout API fails', async () => {
+    vi.mocked(fetchSession).mockResolvedValue(verifiedSession)
+    vi.mocked(logout).mockRejectedValue(new Error('Unauthorized'))
+    const user = userEvent.setup()
+
+    render(
+      <AuthProvider>
+        <AuthProbe />
+      </AuthProvider>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('User: Verified User')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Sign out' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Signed out')).toBeInTheDocument()
+    })
   })
 
   it('signOut calls logout API and clears session', async () => {

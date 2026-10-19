@@ -8,8 +8,8 @@ public sealed class LoggingTransactionalEmailSender(ILogger<LoggingTransactional
 {
     public Task SendEmailConfirmationAsync(SpennyUser user, string confirmationLink, CancellationToken cancellationToken)
     {
-        logger.LogInformation(
-            "Email confirmation for {Email}: {Link}",
+        logger.LogWarning(
+            "Spenny dev email (SMTP not configured) — confirm {Email}: {Link}",
             user.Email,
             confirmationLink);
         return Task.CompletedTask;
@@ -17,8 +17,8 @@ public sealed class LoggingTransactionalEmailSender(ILogger<LoggingTransactional
 
     public Task SendPasswordResetAsync(SpennyUser user, string resetLink, CancellationToken cancellationToken)
     {
-        logger.LogInformation(
-            "Password reset for {Email}: {Link}",
+        logger.LogWarning(
+            "Spenny dev email (SMTP not configured) — password reset for {Email}: {Link}",
             user.Email,
             resetLink);
         return Task.CompletedTask;
