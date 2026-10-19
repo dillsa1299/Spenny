@@ -45,11 +45,14 @@ export function FlashNoticeProvider({ children }: { children: ReactNode }) {
         onClose={close}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        {notice ? (
-          <Alert severity={notice.severity} variant="filled" onClose={close} sx={{ width: '100%' }}>
-            {notice.message}
-          </Alert>
-        ) : null}
+        <Alert
+          severity={notice?.severity ?? 'info'}
+          variant="filled"
+          onClose={close}
+          sx={{ width: '100%' }}
+        >
+          {notice?.message ?? ''}
+        </Alert>
       </Snackbar>
     </FlashNoticeContext.Provider>
   )
