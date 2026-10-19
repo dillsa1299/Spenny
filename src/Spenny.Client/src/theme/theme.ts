@@ -39,6 +39,14 @@ export const spennyTheme = createTheme({
     borderRadius: 12,
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        // AppBackground paints the global gradient on body.
+        body: {
+          backgroundColor: 'transparent',
+        },
+      },
+    },
     MuiOutlinedInput: {
       styleOverrides: {
         input: {

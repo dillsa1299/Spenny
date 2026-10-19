@@ -10,6 +10,12 @@ export function daysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate()
 }
 
+/**
+ * Pseudo-day plotted before the 1st so the step line starts at the full month total.
+ * Not a calendar day: it carries no payments and must not be labelled or highlighted.
+ */
+export const MONTH_START_ANCHOR_DAY = 0
+
 export type BurndownLineChartData = {
   xDays: number[]
   remainingValues: number[]
@@ -23,8 +29,10 @@ export function buildBurndownLineChartData(
   burndownSteps: BurndownStepDto[],
 ): BurndownLineChartData {
   const points = buildBurndownPoints(year, month, monthTotal, burndownSteps)
-  const xDays = points.map((p) => p.day)
-  const remainingValues = points.map((p) => p.remaining)
+  // Day 1 already holds the balance after the 1st's payments, so without this anchor the usual
+  // step-down is missing for the busiest day of the month and the plot top sits empty.
+  const xDays = [MONTH_START_ANCHOR_DAY, ...points.map((p) => p.day)]
+  const remainingValues = [monthTotal, ...points.map((p) => p.remaining)]
   return { xDays, remainingValues, points }
 }
 
@@ -35,13 +43,16 @@ export type BurndownAxisMarkers = {
   labelAmounts: number[]
 }
 
-export function burndownAxisMarkers(points: BurndownPoint[]): BurndownAxisMarkers {
+export function burndownAxisMarkers(
+  points: BurndownPoint[],
+  startingBalance: number,
+): BurndownAxisMarkers {
   if (points.length === 0) {
     return { labelDays: [], labelAmounts: [] }
   }
 
   const labelDays: number[] = []
-  const amountSet = new Set<number>()
+  const amountSet = new Set<number>([startingBalance])
 
   for (let i = 0; i < points.length; i += 1) {
     const changed = i === 0 || points[i].remaining !== points[i - 1].remaining
@@ -59,6 +70,30 @@ export function burndownAxisMarkers(points: BurndownPoint[]): BurndownAxisMarker
   return { labelDays, labelAmounts }
 }
 
+/**
+ * Drops plateau amounts that would render too close together on the y axis.
+ * Months with many payment days produce clustered remaining values near zero,
+ * which overlap as labels; the top and bottom of the range are always kept.
+ */
+export function spacedAxisAmounts(amounts: number[], yMax: number, minGapRatio: number): number[] {
+  if (amounts.length <= 2 || yMax <= 0) {
+    return amounts
+  }
+
+  const minGap = yMax * minGapRatio
+  const highest = amounts[amounts.length - 1]
+  const kept = [amounts[0]]
+
+  for (const amount of amounts.slice(1, -1)) {
+    if (amount - kept[kept.length - 1] >= minGap && highest - amount >= minGap) {
+      kept.push(amount)
+    }
+  }
+
+  kept.push(highest)
+  return kept
+}
+
 export function dayFromAxisHighlight(
   xDays: number[],
   dataIndex: number | undefined,
@@ -66,5 +101,6 @@ export function dayFromAxisHighlight(
   if (dataIndex === undefined || dataIndex < 0 || dataIndex >= xDays.length) {
     return null
   }
-  return xDays[dataIndex] ?? null
+  const day = xDays[dataIndex]
+  return day === undefined || day === MONTH_START_ANCHOR_DAY ? null : day
 }

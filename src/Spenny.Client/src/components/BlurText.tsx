@@ -8,12 +8,21 @@ type BlurTextProps = {
   as?: 'h1' | 'h2' | 'p' | 'span'
 }
 
+function prefersReducedMotion(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
 export function BlurText({ text, className, as = 'h1' }: BlurTextProps) {
   const ref = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
+
+    if (prefersReducedMotion()) {
+      gsap.set(el, { filter: 'blur(0px)', opacity: 1, y: 0 })
+      return
+    }
 
     gsap.fromTo(
       el,
