@@ -30,6 +30,11 @@ describe('BurndownAxisTooltip', () => {
         value={{
           year: 2026,
           month: 10,
+          burndownSteps: [{ effectiveDate: '2026-10-05', dayTotal: 100, remainingAfter: 75 }],
+          points: Array.from({ length: 31 }, (_, i) => ({
+            day: i + 1,
+            remaining: i + 1 < 5 ? 175 : 75,
+          })),
           occurrencesByDay: new Map([
             [
               5,
@@ -52,6 +57,7 @@ describe('BurndownAxisTooltip', () => {
         <BurndownAxisTooltip />
       </BurndownTooltipProvider>,
     )
-    expect(screen.getByText('Rent')).toBeInTheDocument()
+    expect(screen.getByText('Rent · £100.00')).toBeInTheDocument()
+    expect(screen.getByText('Starting balance')).toBeInTheDocument()
   })
 })

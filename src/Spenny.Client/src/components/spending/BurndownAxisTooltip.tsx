@@ -3,11 +3,11 @@ import { ChartsTooltipContainer, useAxesTooltip } from '@mui/x-charts/ChartsTool
 import type { ChartsTooltipProps } from '@mui/x-charts/ChartsTooltip'
 import { BurndownDayTooltipContent } from '@/components/spending/BurndownDayTooltipContent'
 import { useBurndownTooltipContext } from '@/components/spending/BurndownTooltipContext'
-import { isoDateForDay } from '@/spending/burndownChartData'
+import { buildBurndownDaySummary } from '@/spending/burndownDaySummary'
 
 export function BurndownAxisTooltip(props: ChartsTooltipProps<'axis'>) {
   const { trigger = 'axis', ...containerProps } = props
-  const { year, month, occurrencesByDay } = useBurndownTooltipContext()
+  const { year, month, burndownSteps, points, occurrencesByDay } = useBurndownTooltipContext()
 
   const axesTooltip = useAxesTooltip()
   const axisEntry = axesTooltip?.[0]
@@ -20,12 +20,12 @@ export function BurndownAxisTooltip(props: ChartsTooltipProps<'axis'>) {
     return null
   }
 
-  const isoDate = isoDateForDay(year, month, day)
   const payments = occurrencesByDay.get(day) ?? []
+  const summary = buildBurndownDaySummary(year, month, day, burndownSteps, points, payments)
 
   return (
     <ChartsTooltipContainer trigger={trigger} anchor="node" position="top" {...containerProps}>
-      <BurndownDayTooltipContent isoDate={isoDate} payments={payments} />
+      <BurndownDayTooltipContent summary={summary} />
     </ChartsTooltipContainer>
   )
 }

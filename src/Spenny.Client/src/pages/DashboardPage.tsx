@@ -44,7 +44,7 @@ export function DashboardPage() {
             remainingAtToday={month.remainingAtToday}
           />
           <Stack spacing={0.75}>
-            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '1.125rem', sm: '1.375rem' } }}>
               Coming up
             </Typography>
             <ComingUpList

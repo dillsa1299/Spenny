@@ -8,6 +8,7 @@ import type { LineChartSlots } from '@mui/x-charts/LineChart'
 import type { AxisItemIdentifier } from '@mui/x-charts/models'
 import { useMemo, useState } from 'react'
 import type { BurndownStepDto, SpendingOccurrenceDto } from '@/api/spendingTypes'
+import { BillsRemainingCard } from '@/components/spending/BillsRemainingCard'
 import { BurndownAxisTooltip } from '@/components/spending/BurndownAxisTooltip'
 import { BurndownTooltipProvider } from '@/components/spending/BurndownTooltipContext'
 import { dayFromIsoDate } from '@/spending/burndownPoints'
@@ -93,35 +94,11 @@ export function BurndownChart({
 
   return (
     <Box sx={{ width: '100%', minWidth: 0, position: 'relative' }}>
-      <Typography
-        component="p"
-        sx={{
-          fontWeight: 700,
-          letterSpacing: '-0.02em',
-          fontVariantNumeric: 'tabular-nums',
-          fontSize: { xs: '1.35rem', sm: '1.5rem' },
-          lineHeight: 1.2,
-          mb: { xs: 1, sm: 1.5 },
-        }}
-      >
-        <Box component="span" sx={{ display: 'block' }}>
-          {formatGbp(displayedRemaining)} / {formatGbp(monthTotal)}
-        </Box>
-        <Box
-          component="span"
-          sx={{
-            display: 'block',
-            fontSize: '0.82em',
-            fontWeight: 600,
-            color: 'text.secondary',
-            mt: 0.25,
-          }}
-        >
-          remaining
-        </Box>
-      </Typography>
+      <BillsRemainingCard remaining={displayedRemaining} monthTotal={monthTotal} />
 
-      <BurndownTooltipProvider value={{ year, month, occurrencesByDay: byDay }}>
+      <BurndownTooltipProvider
+        value={{ year, month, burndownSteps, points: chartData.points, occurrencesByDay: byDay }}
+      >
         <Box sx={{ width: '100%', height: CHART_HEIGHT }}>
           <LineChart
           height={CHART_HEIGHT}
@@ -140,7 +117,7 @@ export function BurndownChart({
               disableTicks: true,
               tickInterval: xTickValues,
               tickLabelStyle: { fontSize: 10 },
-              valueFormatter: (day: number) => String(day),
+              valueFormatter: (day: number) => formatOrdinalDay(isoDateForDay(year, month, day)),
             },
           ]}
           yAxis={[
@@ -165,15 +142,25 @@ export function BurndownChart({
             },
           ]}
           slots={{ tooltip: BurndownAxisTooltip as NonNullable<LineChartSlots['tooltip']> }}
-          slotProps={{ tooltip: { trigger: 'axis', anchor: 'node', position: 'top' } }}
+          slotProps={{ tooltip: { trigger: 'axis', position: 'top' } }}
           sx={{
             width: '100%',
             '& .MuiLineElement-root': { strokeWidth: 2.5 },
+            '& .MuiChartsAxisHighlight-root path': {
+              stroke: theme.palette.text.disabled,
+              strokeDasharray: '4 3',
+              strokeWidth: 1.5,
+            },
           }}
         >
           {todayDay !== null && (
             <ChartsReferenceLine
               x={todayDay}
+              axisId="burndown-x"
+              label="Today"
+              labelAlign="start"
+              spacing={{ x: 4, y: 4 }}
+              labelStyle={{ fontSize: 10, fill: '#52b788', fontWeight: 600 }}
               lineStyle={{ stroke: '#52b788', strokeDasharray: '4 3', strokeWidth: 1.5 }}
             />
           )}

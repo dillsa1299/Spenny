@@ -103,6 +103,7 @@ export function SpendingPage() {
       {month && !loading && (
         <OccurrenceList
           occurrences={month.occurrences}
+          series={series}
           emptyMessage="No spending this month. Add a bill or subscription to get started."
           onSelect={openEdit}
         />

@@ -1,10 +1,13 @@
-// Supplies month context to the MUI X axis tooltip slot (same chart, all breakpoints).
+// Supplies month burndown data to the MUI X axis tooltip slot (same chart, all breakpoints).
 import { createContext, useContext, type ReactNode } from 'react'
-import type { SpendingOccurrenceDto } from '@/api/spendingTypes'
+import type { BurndownStepDto, SpendingOccurrenceDto } from '@/api/spendingTypes'
+import type { BurndownPoint } from '@/spending/burndownPoints'
 
 export type BurndownTooltipContextValue = {
   year: number
   month: number
+  burndownSteps: BurndownStepDto[]
+  points: BurndownPoint[]
   occurrencesByDay: Map<number, SpendingOccurrenceDto[]>
 }
 

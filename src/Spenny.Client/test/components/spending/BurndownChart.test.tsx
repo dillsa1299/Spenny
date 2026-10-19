@@ -30,8 +30,9 @@ describe('BurndownChart', () => {
         remainingAtToday={25}
       />,
     )
-    expect(screen.getByText(/£25\.00 \/ £175\.00/, { exact: false })).toBeInTheDocument()
-    expect(screen.getByText('remaining')).toBeInTheDocument()
+    expect(screen.getByText('Monthly bills remaining')).toBeInTheDocument()
+    expect(screen.getByText('£25.00')).toBeInTheDocument()
+    expect(screen.getByText('/ £175.00')).toBeInTheDocument()
     expect(document.querySelector('svg')).toBeTruthy()
   })
 })

@@ -35,11 +35,12 @@ describe('DashboardPage', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText(/£25\.00 \/ £175\.00/)).toBeInTheDocument()
+      expect(screen.getByText('/ £175.00')).toBeInTheDocument()
     })
     expect(screen.getByRole('heading', { name: 'Coming up' })).toBeInTheDocument()
     const comingUpRow = screen.getByRole('listitem')
-    expect(comingUpRow).toHaveTextContent('20th · C · Transport')
+    expect(comingUpRow.closest('ul')?.previousElementSibling).toHaveTextContent('20th October')
+    expect(comingUpRow).toHaveTextContent('C · Transport')
     expect(screen.queryByText('A', { exact: true })).not.toBeInTheDocument()
   })
 })

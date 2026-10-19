@@ -112,6 +112,10 @@ export const SPENDING_CATEGORY_OPTIONS: { value: SpendingCategoryValue; label: s
   { value: SpendingCategory.Transport, label: 'Transport' },
 ]
 
+export function frequencyLabel(frequency: SpendingFrequencyValue): string {
+  return SPENDING_FREQUENCY_OPTIONS.find((o) => o.value === frequency)?.label ?? 'One-off'
+}
+
 export function categoryLabel(category: SpendingCategoryValue): string {
   return SPENDING_CATEGORY_OPTIONS.find((o) => o.value === category)?.label ?? 'General'
 }
