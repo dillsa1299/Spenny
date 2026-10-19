@@ -4,6 +4,7 @@ import {
   burndownAxisMarkers,
   dayFromAxisHighlight,
   isoDateForDay,
+  spacedAxisAmounts,
 } from '@/spending/burndownChartData'
 
 describe('burndownChartData', () => {
@@ -34,5 +35,16 @@ describe('burndownChartData', () => {
     const markers = burndownAxisMarkers(points)
     expect(markers.labelDays).toEqual([1, 5, 20])
     expect(markers.labelAmounts).toEqual([25, 75, 175])
+  })
+
+  it('drops clustered y labels but keeps the range ends', () => {
+    const spaced = spacedAxisAmounts([0, 10, 22, 27, 62, 90, 152, 190, 201, 249, 369], 1049, 0.1)
+    expect(spaced[0]).toBe(0)
+    expect(spaced.at(-1)).toBe(369)
+    expect(spaced.every((value, i) => i === 0 || value - spaced[i - 1] >= 104.9)).toBe(true)
+  })
+
+  it('keeps short label lists untouched', () => {
+    expect(spacedAxisAmounts([0, 75], 175, 0.1)).toEqual([0, 75])
   })
 })

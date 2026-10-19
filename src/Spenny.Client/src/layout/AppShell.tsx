@@ -9,19 +9,12 @@ import { PressableButton } from '@/components/PressableButton'
 
 export function AppShell() {
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        bgcolor: 'background.default',
-      }}
-    >
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <AppBar
         position="sticky"
         elevation={0}
         sx={{
-          backgroundColor: 'rgba(13, 17, 23, 0.65)',
+          backgroundColor: 'rgba(13, 17, 23, 0.55)',
           backdropFilter: 'blur(20px) saturate(160%)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
           '@media (prefers-reduced-transparency: reduce)': {
@@ -63,7 +56,6 @@ export function AppShell() {
         component="main"
         maxWidth={false}
         sx={{
-          flex: 1,
           width: '100%',
           maxWidth: 960,
           py: { xs: 3, sm: 4, md: 5 },

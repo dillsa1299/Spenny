@@ -24,7 +24,18 @@ export function BurndownAxisTooltip(props: ChartsTooltipProps<'axis'>) {
   const summary = buildBurndownDaySummary(year, month, day, burndownSteps, points, payments)
 
   return (
-    <ChartsTooltipContainer trigger={trigger} anchor="node" position="top" {...containerProps}>
+    <ChartsTooltipContainer
+      trigger={trigger}
+      anchor="chart"
+      position="top"
+      disablePortal={false}
+      slotProps={{
+        root: {
+          strategy: 'fixed',
+        },
+      }}
+      {...containerProps}
+    >
       <BurndownDayTooltipContent summary={summary} />
     </ChartsTooltipContainer>
   )

@@ -59,6 +59,30 @@ export function burndownAxisMarkers(points: BurndownPoint[]): BurndownAxisMarker
   return { labelDays, labelAmounts }
 }
 
+/**
+ * Drops plateau amounts that would render too close together on the y axis.
+ * Months with many payment days produce clustered remaining values near zero,
+ * which overlap as labels; the top and bottom of the range are always kept.
+ */
+export function spacedAxisAmounts(amounts: number[], yMax: number, minGapRatio: number): number[] {
+  if (amounts.length <= 2 || yMax <= 0) {
+    return amounts
+  }
+
+  const minGap = yMax * minGapRatio
+  const highest = amounts[amounts.length - 1]
+  const kept = [amounts[0]]
+
+  for (const amount of amounts.slice(1, -1)) {
+    if (amount - kept[kept.length - 1] >= minGap && highest - amount >= minGap) {
+      kept.push(amount)
+    }
+  }
+
+  kept.push(highest)
+  return kept
+}
+
 export function dayFromAxisHighlight(
   xDays: number[],
   dataIndex: number | undefined,

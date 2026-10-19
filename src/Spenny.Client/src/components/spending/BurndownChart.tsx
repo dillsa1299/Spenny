@@ -17,6 +17,7 @@ import {
   burndownAxisMarkers,
   dayFromAxisHighlight,
   isoDateForDay,
+  spacedAxisAmounts,
 } from '@/spending/burndownChartData'
 import { occurrencesByDay } from '@/spending/occurrencesByDay'
 import { formatGbp } from '@/lib/formatGbp'
@@ -34,6 +35,9 @@ type BurndownChartProps = {
 }
 
 const CHART_HEIGHT = 220
+
+/** Smallest vertical gap between y labels, as a fraction of the month total, so 10px text does not collide. */
+const Y_LABEL_MIN_GAP_RATIO = 0.1
 
 export function BurndownChart({
   year,
@@ -89,8 +93,13 @@ export function BurndownChart({
   const lineColor = theme.palette.secondary.main
   const axisMarkers = useMemo(() => burndownAxisMarkers(chartData.points), [chartData.points])
   const xTickValues = axisMarkers.labelDays.length > 0 ? axisMarkers.labelDays : [1]
-  const yTickValues =
-    axisMarkers.labelAmounts.length > 0 ? axisMarkers.labelAmounts : [0, yMax]
+  const yTickValues = useMemo(
+    () =>
+      axisMarkers.labelAmounts.length > 0
+        ? spacedAxisAmounts(axisMarkers.labelAmounts, yMax, Y_LABEL_MIN_GAP_RATIO)
+        : [0, yMax],
+    [axisMarkers.labelAmounts, yMax],
+  )
 
   return (
     <Box sx={{ width: '100%', minWidth: 0, position: 'relative' }}>

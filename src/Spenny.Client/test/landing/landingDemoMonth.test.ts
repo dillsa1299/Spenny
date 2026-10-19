@@ -16,5 +16,7 @@ describe('landingDemoMonth', () => {
       return sum + (row?.amount ?? 0)
     }, 0)
     expect(landingDemoMonth.remainingAtToday).toBe(upcomingSum)
+    expect(landingDemoMonth.burndownSteps.length).toBe(10)
+    expect(landingDemoMonth.remainingAtToday).toBe(190)
   })
 })

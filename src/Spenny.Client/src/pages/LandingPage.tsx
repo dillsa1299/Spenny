@@ -12,21 +12,35 @@ import { comingUpEmptyMessage } from '@/spending/comingUpCopy'
 
 const demo = landingDemoMonth
 
-const highlights = ["See what's left", "See what's next", 'No mark-paid', 'Mobile-first'] as const
+const highlights = ["See what's left", "See what's next", 'Mobile-first'] as const
 
-const demoSurfaceSx = {
+const demoSectionSx = {
   width: '100%',
   minWidth: 0,
-  p: { xs: 2.25, sm: 3 },
   borderRadius: { xs: 2.5, sm: 3 },
   border: '1px solid rgba(255, 255, 255, 0.1)',
+  boxShadow: '0 28px 64px rgba(0, 0, 0, 0.45)',
+  overflow: 'hidden',
+}
+
+const demoHeaderSurfaceSx = {
+  p: { xs: 2.25, sm: 3 },
+  pb: { xs: 2, sm: 2.25 },
   backgroundColor: 'rgba(22, 27, 34, 0.55)',
   backdropFilter: 'blur(28px) saturate(165%)',
-  boxShadow: '0 28px 64px rgba(0, 0, 0, 0.45)',
   '@media (prefers-reduced-transparency: reduce)': {
     backdropFilter: 'none',
     backgroundColor: 'background.paper',
-    borderColor: 'divider',
+  },
+}
+
+const demoChartBlockSx = {
+  p: { xs: 2.25, sm: 3 },
+  pt: { xs: 2, sm: 2.25 },
+  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+  backgroundColor: 'background.paper',
+  '@media (prefers-reduced-transparency: reduce)': {
+    borderTopColor: 'divider',
   },
 }
 
@@ -41,24 +55,6 @@ export function LandingPage() {
         minWidth: 0,
       }}
     >
-      <Box
-        aria-hidden
-        sx={{
-          pointerEvents: 'none',
-          position: 'absolute',
-          left: '50%',
-          top: { xs: -80, md: -120 },
-          width: { xs: '140%', md: '120%' },
-          height: { xs: 280, md: 360 },
-          transform: 'translateX(-50%)',
-          background:
-            'radial-gradient(ellipse 70% 55% at 50% 0%, rgba(82, 183, 136, 0.22), transparent 68%)',
-          '@media (prefers-reduced-transparency: reduce)': {
-            opacity: 0.35,
-          },
-        }}
-      />
-
       <Stack spacing={{ xs: 5, md: 7 }} sx={{ position: 'relative' }}>
         <Stack
           component="header"
@@ -93,7 +89,7 @@ export function LandingPage() {
               fontWeight: 500,
             }}
           >
-            Your month in one place: what&apos;s committed, what&apos;s still ahead.
+            Your month in one place - what&apos;s committed, what&apos;s still ahead.
           </Typography>
 
           <Stack
@@ -166,52 +162,56 @@ export function LandingPage() {
           </Stack>
         </Stack>
 
-        <Box component="section" aria-labelledby="landing-demo-heading" sx={demoSurfaceSx}>
-          <Stack spacing={0.75} sx={{ mb: 2.5 }}>
-            <Typography
-              variant="overline"
-              sx={{
-                display: 'block',
-                color: 'primary.main',
-                fontWeight: 700,
-                letterSpacing: '0.14em',
-                lineHeight: 1.2,
-              }}
-            >
-              Preview
-            </Typography>
-            <Typography id="landing-demo-heading" variant="h5" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
-              See it in action
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-              Example data — not your account.
-            </Typography>
-          </Stack>
+        <Box component="section" aria-labelledby="landing-demo-heading" sx={demoSectionSx}>
+          <Box sx={demoHeaderSurfaceSx}>
+            <Stack spacing={0.75}>
+              <Typography
+                variant="overline"
+                sx={{
+                  display: 'block',
+                  color: 'primary.main',
+                  fontWeight: 700,
+                  letterSpacing: '0.14em',
+                  lineHeight: 1.2,
+                }}
+              >
+                Preview
+              </Typography>
+              <Typography id="landing-demo-heading" variant="h5" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
+                See it in action
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                Example data — not your account.
+              </Typography>
+            </Stack>
+          </Box>
 
-          <BurndownChart
-            year={demo.year}
-            month={demo.month}
-            monthTotal={demo.monthTotal}
-            burndownSteps={demo.burndownSteps}
-            occurrences={demo.occurrences}
-            showTodayMarker={demo.showTodayMarker}
-            asOfDate={demo.asOfDate}
-            remainingAtToday={demo.remainingAtToday}
-          />
-
-          <Stack spacing={0.75} sx={{ mt: 2.5 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 700, fontSize: { xs: '1.125rem', sm: '1.25rem' }, letterSpacing: '-0.02em' }}
-            >
-              Coming up
-            </Typography>
-            <ComingUpList
+          <Box sx={demoChartBlockSx}>
+            <BurndownChart
+              year={demo.year}
+              month={demo.month}
+              monthTotal={demo.monthTotal}
+              burndownSteps={demo.burndownSteps}
               occurrences={demo.occurrences}
-              upcomingIds={demo.upcomingOccurrenceIds}
-              emptyMessage={comingUpEmptyMessage(demo)}
+              showTodayMarker={demo.showTodayMarker}
+              asOfDate={demo.asOfDate}
+              remainingAtToday={demo.remainingAtToday}
             />
-          </Stack>
+
+            <Stack spacing={0.75} sx={{ mt: 2.5 }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, fontSize: { xs: '1.125rem', sm: '1.25rem' }, letterSpacing: '-0.02em' }}
+              >
+                Coming up
+              </Typography>
+              <ComingUpList
+                occurrences={demo.occurrences}
+                upcomingIds={demo.upcomingOccurrenceIds}
+                emptyMessage={comingUpEmptyMessage(demo)}
+              />
+            </Stack>
+          </Box>
         </Box>
       </Stack>
     </Box>

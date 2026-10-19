@@ -1,6 +1,39 @@
 @import 'tailwindcss';
 
+/* Fallback if GlobalStyles load late; must match AppBackground (no opaque gradient on top of layers). */
+html {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
+  background-color: #0d1117;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 56px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 56px),
+    radial-gradient(ellipse 100% 75% at 50% -20%, rgba(82, 183, 136, 0.5), transparent 58%),
+    radial-gradient(ellipse 60% 50% at 100% 95%, rgba(230, 57, 70, 0.24), transparent 55%),
+    radial-gradient(ellipse 50% 45% at 0% 90%, rgba(82, 183, 136, 0.22), transparent 52%);
+  background-attachment: fixed;
+}
+
+#root {
+  background-color: transparent;
+}
+
+/* MUI X Charts text-measurement SVG is positioned far off-screen; do not expand scroll height. */
+body > svg[aria-hidden='true'] {
+  top: 0 !important;
+  left: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body {
+    background-image: linear-gradient(180deg, #0d1117 0%, #0a0e14 100%);
+    background-attachment: scroll;
+  }
 }
