@@ -25,4 +25,7 @@ public sealed class SpendingSeriesEntity
     public bool RoundWeekendToFriday { get; set; }
 
     public string? Description { get; set; }
+
+    /// <summary>When the series was first saved; used to order occurrences on the same effective date.</summary>
+    public DateTimeOffset CreatedAtUtc { get; set; }
 }

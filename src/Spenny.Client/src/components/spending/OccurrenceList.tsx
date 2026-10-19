@@ -28,17 +28,38 @@ export function OccurrenceList({ occurrences, emptyMessage, onSelect }: Occurren
         <ListItemButton
           key={`${item.seriesId}-${item.occurrenceDate}`}
           onClick={() => onSelect(item)}
-          sx={{ borderRadius: 1, mb: 0.5 }}
+          sx={{
+            borderRadius: 1,
+            mb: 0.5,
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) auto',
+            columnGap: 1,
+            alignItems: 'start',
+            width: '100%',
+          }}
         >
           <ListItemText
             primary={item.name}
             secondary={`${item.effectiveDate} · ${categoryLabel(item.category)}`}
             slotProps={{
-              primary: { sx: { fontWeight: 600 } },
-              secondary: { sx: { color: 'text.secondary' } },
+              primary: { sx: { fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } } },
+              secondary: {
+                sx: { color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+              },
             }}
+            sx={{ minWidth: 0, m: 0 }}
           />
-          <Typography sx={{ color: '#e63946', fontWeight: 600 }}>{formatGbp(item.amount)}</Typography>
+          <Typography
+            sx={{
+              color: '#e63946',
+              fontWeight: 600,
+              fontSize: { xs: '0.875rem', sm: '1rem' },
+              fontVariantNumeric: 'tabular-nums',
+              flexShrink: 0,
+            }}
+          >
+            {formatGbp(item.amount)}
+          </Typography>
         </ListItemButton>
       ))}
     </List>

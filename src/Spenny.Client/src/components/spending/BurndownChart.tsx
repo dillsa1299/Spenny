@@ -1,93 +1,200 @@
-// SVG step burndown for the selected month; today marker when API requests it.
+// Month burndown via MUI X LineChart; axis tooltip shows payments for the highlighted day.
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import type { BurndownStepDto } from '@/api/spendingTypes'
-import { buildBurndownPoints, dayFromIsoDate } from '@/spending/burndownPoints'
+import { useTheme } from '@mui/material/styles'
+import { ChartsReferenceLine } from '@mui/x-charts/ChartsReferenceLine'
+import { LineChart } from '@mui/x-charts/LineChart'
+import type { LineChartSlots } from '@mui/x-charts/LineChart'
+import type { AxisItemIdentifier } from '@mui/x-charts/models'
+import { useMemo, useState } from 'react'
+import type { BurndownStepDto, SpendingOccurrenceDto } from '@/api/spendingTypes'
+import { BurndownAxisTooltip } from '@/components/spending/BurndownAxisTooltip'
+import { BurndownTooltipProvider } from '@/components/spending/BurndownTooltipContext'
+import { dayFromIsoDate } from '@/spending/burndownPoints'
+import {
+  buildBurndownLineChartData,
+  burndownAxisMarkers,
+  dayFromAxisHighlight,
+  isoDateForDay,
+} from '@/spending/burndownChartData'
+import { occurrencesByDay } from '@/spending/occurrencesByDay'
 import { formatGbp } from '@/lib/formatGbp'
+import { formatOrdinalDay } from '@/lib/formatOrdinalDay'
 
 type BurndownChartProps = {
   year: number
   month: number
   monthTotal: number
   burndownSteps: BurndownStepDto[]
+  occurrences: SpendingOccurrenceDto[]
   showTodayMarker: boolean
   asOfDate: string
   remainingAtToday: number
 }
 
-const width = 320
-const height = 160
-const padding = { top: 12, right: 8, bottom: 24, left: 8 }
+const CHART_HEIGHT = 220
 
 export function BurndownChart({
   year,
   month,
   monthTotal,
   burndownSteps,
+  occurrences,
   showTodayMarker,
   asOfDate,
   remainingAtToday,
 }: BurndownChartProps) {
-  const daysInMonth = new Date(year, month, 0).getDate()
-  const points = buildBurndownPoints(year, month, monthTotal, burndownSteps)
-  const maxY = Math.max(monthTotal, 1)
-  const chartW = width - padding.left - padding.right
-  const chartH = height - padding.top - padding.bottom
+  const theme = useTheme()
+  const [activeDay, setActiveDay] = useState<number | null>(null)
+  const [axisTooltipItem, setAxisTooltipItem] = useState<{
+    seriesId: 'remaining'
+    dataIndex: number
+  } | null>(null)
 
-  const xForDay = (day: number) => padding.left + ((day - 1) / (daysInMonth - 1 || 1)) * chartW
-  const yForValue = (value: number) => padding.top + chartH - (value / maxY) * chartH
-
-  const polyline = points
-    .map((p) => `${xForDay(p.day)},${yForValue(p.remaining)}`)
-    .join(' ')
+  const chartData = useMemo(
+    () => buildBurndownLineChartData(year, month, monthTotal, burndownSteps),
+    [year, month, monthTotal, burndownSteps],
+  )
+  const byDay = useMemo(() => occurrencesByDay(occurrences), [occurrences])
 
   const todayDay = showTodayMarker ? dayFromIsoDate(asOfDate) : null
+
+  const displayedRemaining = useMemo(() => {
+    if (activeDay === null) {
+      return remainingAtToday
+    }
+    return chartData.points.find((p) => p.day === activeDay)?.remaining ?? remainingAtToday
+  }, [activeDay, chartData.points, remainingAtToday])
+
   const label =
     monthTotal === 0
       ? 'No scheduled spending this month'
-      : `Burndown from ${formatGbp(monthTotal)}; ${formatGbp(remainingAtToday)} left after today`
+      : `${formatGbp(displayedRemaining)} of ${formatGbp(monthTotal)} remaining`
+
+  const onHighlightedAxisChange = (axisItems: AxisItemIdentifier[]) => {
+    const xItem = axisItems.find((item) => item.axisId === 'burndown-x') ?? axisItems[0]
+    const dataIndex = xItem?.dataIndex
+    if (dataIndex === undefined || dataIndex < 0) {
+      setActiveDay(null)
+      setAxisTooltipItem(null)
+      return
+    }
+    setActiveDay(dayFromAxisHighlight(chartData.xDays, dataIndex))
+    // Axis tooltips do not set a line tooltip item; node anchor needs one on the first tap/click.
+    setAxisTooltipItem({ seriesId: 'remaining', dataIndex })
+  }
+
+  const yMax = Math.max(monthTotal, 1)
+  const lineColor = theme.palette.secondary.main
+  const axisMarkers = useMemo(() => burndownAxisMarkers(chartData.points), [chartData.points])
+  const xTickValues = axisMarkers.labelDays.length > 0 ? axisMarkers.labelDays : [1]
+  const yTickValues =
+    axisMarkers.labelAmounts.length > 0 ? axisMarkers.labelAmounts : [0, yMax]
 
   return (
-    <Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        {formatGbp(monthTotal)} scheduled
-      </Typography>
-      <svg
-        width="100%"
-        viewBox={`0 0 ${width} ${height}`}
-        role="img"
-        aria-label={label}
-        style={{ display: 'block', maxWidth: width }}
+    <Box sx={{ width: '100%', minWidth: 0, position: 'relative' }}>
+      <Typography
+        component="p"
+        sx={{
+          fontWeight: 700,
+          letterSpacing: '-0.02em',
+          fontVariantNumeric: 'tabular-nums',
+          fontSize: { xs: '1.35rem', sm: '1.5rem' },
+          lineHeight: 1.2,
+          mb: { xs: 1, sm: 1.5 },
+        }}
       >
-        <line
-          x1={padding.left}
-          y1={padding.top + chartH}
-          x2={width - padding.right}
-          y2={padding.top + chartH}
-          stroke="rgba(255,255,255,0.15)"
-          strokeWidth={1}
-        />
-        {monthTotal > 0 && (
-          <polyline
-            fill="none"
-            stroke="#e63946"
-            strokeWidth={2}
-            strokeLinejoin="round"
-            points={polyline}
-          />
-        )}
-        {todayDay !== null && (
-          <line
-            x1={xForDay(todayDay)}
-            y1={padding.top}
-            x2={xForDay(todayDay)}
-            y2={padding.top + chartH}
-            stroke="#52b788"
-            strokeWidth={1.5}
-            strokeDasharray="4 3"
-          />
-        )}
-      </svg>
+        <Box component="span" sx={{ display: 'block' }}>
+          {formatGbp(displayedRemaining)} / {formatGbp(monthTotal)}
+        </Box>
+        <Box
+          component="span"
+          sx={{
+            display: 'block',
+            fontSize: '0.82em',
+            fontWeight: 600,
+            color: 'text.secondary',
+            mt: 0.25,
+          }}
+        >
+          remaining
+        </Box>
+      </Typography>
+
+      <BurndownTooltipProvider value={{ year, month, occurrencesByDay: byDay }}>
+        <Box sx={{ width: '100%', height: CHART_HEIGHT }}>
+          <LineChart
+          height={CHART_HEIGHT}
+          desc={label}
+          margin={{ left: 4, right: 4, top: 12, bottom: 20 }}
+          hideLegend
+          axisHighlight={{ x: 'line' }}
+          onHighlightedAxisChange={onHighlightedAxisChange}
+          tooltipItem={axisTooltipItem}
+          xAxis={[
+            {
+              id: 'burndown-x',
+              data: chartData.xDays,
+              scaleType: 'point',
+              height: 'auto',
+              disableTicks: true,
+              tickInterval: xTickValues,
+              tickLabelStyle: { fontSize: 10 },
+              valueFormatter: (day: number) => String(day),
+            },
+          ]}
+          yAxis={[
+            {
+              min: 0,
+              max: yMax,
+              width: 'auto',
+              disableTicks: true,
+              tickInterval: yTickValues,
+              tickLabelStyle: { fontSize: 10 },
+              valueFormatter: (value: number) => formatGbp(value),
+            },
+          ]}
+          series={[
+            {
+              id: 'remaining',
+              data: chartData.remainingValues,
+              curve: 'stepAfter',
+              color: lineColor,
+              showMark: false,
+              disableHighlight: true,
+            },
+          ]}
+          slots={{ tooltip: BurndownAxisTooltip as NonNullable<LineChartSlots['tooltip']> }}
+          slotProps={{ tooltip: { trigger: 'axis', anchor: 'node', position: 'top' } }}
+          sx={{
+            width: '100%',
+            '& .MuiLineElement-root': { strokeWidth: 2.5 },
+          }}
+        >
+          {todayDay !== null && (
+            <ChartsReferenceLine
+              x={todayDay}
+              lineStyle={{ stroke: '#52b788', strokeDasharray: '4 3', strokeWidth: 1.5 }}
+            />
+          )}
+          </LineChart>
+        </Box>
+      </BurndownTooltipProvider>
+
+      <Typography
+        aria-live="polite"
+        sx={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          overflow: 'hidden',
+          clip: 'rect(0,0,0,0)',
+        }}
+      >
+        {activeDay !== null
+          ? `${formatOrdinalDay(isoDateForDay(year, month, activeDay))}: ${label}`
+          : label}
+      </Typography>
     </Box>
   )
 }

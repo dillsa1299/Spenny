@@ -9,4 +9,5 @@ public sealed record SpendingSeries(
     SpendingFrequency Frequency,
     SpendingCategory Category,
     bool RoundWeekendToFriday,
-    string? Description = null);
+    string? Description = null,
+    DateTimeOffset CreatedAtUtc = default);

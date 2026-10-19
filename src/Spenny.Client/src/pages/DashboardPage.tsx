@@ -9,15 +9,16 @@ import { MonthSelector } from '@/components/MonthSelector'
 import { useSelectedMonth } from '@/month/SelectedMonthContext'
 import { comingUpEmptyMessage } from '@/spending/comingUpCopy'
 import { useSpendingData } from '@/spending/useSpendingData'
-import { formatGbp } from '@/lib/formatGbp'
-
 export function DashboardPage() {
   const { selectedMonth } = useSelectedMonth()
   const { month, loading, error } = useSpendingData(selectedMonth, 0)
 
   return (
-    <Stack spacing={2.5}>
-      <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
+    <Stack spacing={{ xs: 2, sm: 2.5 }} sx={{ width: '100%', minWidth: 0 }}>
+      <Typography
+        variant="h4"
+        sx={{ fontWeight: 700, letterSpacing: '-0.02em', fontSize: { xs: '1.5rem', sm: '2.125rem' } }}
+      >
         Dashboard
       </Typography>
       <MonthSelector />
@@ -37,19 +38,15 @@ export function DashboardPage() {
             month={month.month}
             monthTotal={month.monthTotal}
             burndownSteps={month.burndownSteps}
+            occurrences={month.occurrences}
             showTodayMarker={month.showTodayMarker}
             asOfDate={month.asOfDate}
             remainingAtToday={month.remainingAtToday}
           />
-          <Stack spacing={1}>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          <Stack spacing={0.75}>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
               Coming up
             </Typography>
-            {month.showTodayMarker && (
-              <Typography variant="body2" color="text.secondary">
-                {formatGbp(month.remainingAtToday)} still scheduled after today
-              </Typography>
-            )}
             <ComingUpList
               occurrences={month.occurrences}
               upcomingIds={month.upcomingOccurrenceIds}

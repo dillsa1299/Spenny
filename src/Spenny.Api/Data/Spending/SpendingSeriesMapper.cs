@@ -13,7 +13,8 @@ internal static class SpendingSeriesMapper
             entity.Frequency,
             entity.Category,
             entity.RoundWeekendToFriday,
-            entity.Description);
+            entity.Description,
+            entity.CreatedAtUtc);
 
     public static void ApplyTemplate(SpendingSeriesEntity entity, UpsertSpendingSeriesRequest request)
     {

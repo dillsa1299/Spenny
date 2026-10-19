@@ -297,6 +297,36 @@ public class SpendingMonthProjectionTests
     }
 
     [Fact]
+    public void Project_ComingUp_SameEffectiveDate_SortedBySeriesCreatedAtOldestFirst()
+    {
+        var older = ProjectionTestFixtures.Series(
+            SeriesA,
+            "First",
+            10m,
+            new DateOnly(2026, 10, 20),
+            SpendingFrequency.OneOff,
+            createdAtUtc: new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        var newer = ProjectionTestFixtures.Series(
+            SeriesB,
+            "Second",
+            20m,
+            new DateOnly(2026, 10, 20),
+            SpendingFrequency.OneOff,
+            createdAtUtc: new DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero));
+
+        var result = SpendingMonthProjection.Project(
+            [newer, older],
+            [],
+            2026,
+            10,
+            new DateOnly(2026, 10, 10));
+
+        Assert.Equal(2, result.UpcomingOccurrenceIds.Count);
+        Assert.Equal(new OccurrenceId(SeriesA, new DateOnly(2026, 10, 20)), result.UpcomingOccurrenceIds[0]);
+        Assert.Equal(new OccurrenceId(SeriesB, new DateOnly(2026, 10, 20)), result.UpcomingOccurrenceIds[1]);
+    }
+
+    [Fact]
     public void Project_ComingUp_PastMonth_IsEmpty()
     {
         var bill = ProjectionTestFixtures.Series(
@@ -336,6 +366,36 @@ public class SpendingMonthProjectionTests
 
         Assert.Single(result.UpcomingOccurrenceIds);
         Assert.False(result.ShowTodayMarker);
+    }
+
+    [Fact]
+    public void Project_Occurrences_SameEffectiveDate_SortedBySeriesCreatedAtOldestFirst()
+    {
+        var older = ProjectionTestFixtures.Series(
+            SeriesA,
+            "First added",
+            100m,
+            new DateOnly(2026, 10, 5),
+            SpendingFrequency.OneOff,
+            createdAtUtc: new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        var newer = ProjectionTestFixtures.Series(
+            SeriesB,
+            "Second added",
+            50m,
+            new DateOnly(2026, 10, 5),
+            SpendingFrequency.OneOff,
+            createdAtUtc: new DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero));
+
+        var result = SpendingMonthProjection.Project(
+            [newer, older],
+            [],
+            2026,
+            10,
+            new DateOnly(2026, 10, 1));
+
+        Assert.Equal(2, result.Occurrences.Count);
+        Assert.Equal(SeriesA, result.Occurrences[0].SeriesId);
+        Assert.Equal(SeriesB, result.Occurrences[1].SeriesId);
     }
 
     [Fact]

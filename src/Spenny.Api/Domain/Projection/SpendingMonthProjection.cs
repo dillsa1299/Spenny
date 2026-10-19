@@ -36,7 +36,9 @@ public static class SpendingMonthProjection
             }
         }
 
-        occurrences.Sort(static (a, b) =>
+        var createdAtBySeriesId = series.ToDictionary(s => s.Id, s => s.CreatedAtUtc);
+
+        occurrences.Sort((a, b) =>
         {
             var byDate = a.EffectiveDate.CompareTo(b.EffectiveDate);
             if (byDate != 0)
@@ -44,8 +46,15 @@ public static class SpendingMonthProjection
                 return byDate;
             }
 
-            var bySeries = a.SeriesId.CompareTo(b.SeriesId);
-            return bySeries != 0 ? bySeries : a.OccurrenceDate.CompareTo(b.OccurrenceDate);
+            var aCreated = createdAtBySeriesId.GetValueOrDefault(a.SeriesId);
+            var bCreated = createdAtBySeriesId.GetValueOrDefault(b.SeriesId);
+            var byCreated = aCreated.CompareTo(bCreated);
+            if (byCreated != 0)
+            {
+                return byCreated;
+            }
+
+            return a.OccurrenceDate.CompareTo(b.OccurrenceDate);
         });
 
         var monthTotal = occurrences.Sum(o => o.Amount);

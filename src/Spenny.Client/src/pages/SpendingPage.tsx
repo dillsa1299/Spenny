@@ -83,8 +83,11 @@ export function SpendingPage() {
   }
 
   return (
-    <Stack spacing={2.5} sx={{ position: 'relative', pb: 8 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
+    <Stack spacing={{ xs: 2, sm: 2.5 }} sx={{ position: 'relative', pb: 8, width: '100%', minWidth: 0 }}>
+      <Typography
+        variant="h4"
+        sx={{ fontWeight: 700, letterSpacing: '-0.02em', fontSize: { xs: '1.5rem', sm: '2.125rem' } }}
+      >
         Spending
       </Typography>
       <MonthSelector />

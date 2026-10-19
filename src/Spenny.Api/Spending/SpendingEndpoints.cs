@@ -54,6 +54,7 @@ public static class SpendingEndpoints
         [FromBody] SeriesWriteRequest request,
         ClaimsPrincipal user,
         SpennyDbContext db,
+        TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
         var userId = RequireUserId(user);
@@ -71,6 +72,7 @@ public static class SpendingEndpoints
         {
             Id = Guid.NewGuid(),
             UserId = userId,
+            CreatedAtUtc = timeProvider.GetUtcNow(),
         };
         SpendingSeriesMapper.ApplyTemplate(entity, validated!);
         db.SpendingSeries.Add(entity);
