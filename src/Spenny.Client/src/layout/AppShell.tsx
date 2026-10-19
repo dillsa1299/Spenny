@@ -1,29 +1,37 @@
 // Public chrome: translucent top bar for marketing and auth routes (not the signed-in tab shell).
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { Link as RouterLink, Outlet } from 'react-router-dom'
+import { PressableButton } from '@/components/PressableButton'
 
 export function AppShell() {
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.default',
+      }}
+    >
       <AppBar
         position="sticky"
         elevation={0}
         sx={{
-          backgroundColor: 'rgba(13, 17, 23, 0.72)',
+          backgroundColor: 'rgba(13, 17, 23, 0.65)',
           backdropFilter: 'blur(20px) saturate(160%)',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
           '@media (prefers-reduced-transparency: reduce)': {
             backdropFilter: 'none',
             backgroundColor: 'background.paper',
+            borderBottomColor: 'divider',
           },
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 64 } }}>
           <Typography
             component={RouterLink}
             to="/"
@@ -38,15 +46,30 @@ export function AppShell() {
           >
             Spenny
           </Typography>
-          <Button component={RouterLink} to="/sign-in" color="inherit">
+          <PressableButton component={RouterLink} to="/sign-in" color="inherit" sx={{ fontWeight: 600 }}>
             Sign in
-          </Button>
-          <Button component={RouterLink} to="/sign-up" variant="contained" sx={{ ml: 1 }}>
+          </PressableButton>
+          <PressableButton
+            component={RouterLink}
+            to="/sign-up"
+            variant="contained"
+            sx={{ borderRadius: 999, px: 2, fontWeight: 600 }}
+          >
             Join now
-          </Button>
+          </PressableButton>
         </Toolbar>
       </AppBar>
-      <Container component="main" sx={{ flex: 1, py: 4 }}>
+      <Container
+        component="main"
+        maxWidth={false}
+        sx={{
+          flex: 1,
+          width: '100%',
+          maxWidth: 960,
+          py: { xs: 3, sm: 4, md: 5 },
+          px: { xs: 2, sm: 3 },
+        }}
+      >
         <Outlet />
       </Container>
     </Box>
