@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Spenny.Api.Data;
 
-namespace Spenny.Api.Tests;
+namespace Spenny.Api.Tests.Support;
 
 public sealed class SpennyWebApplicationFactory(int permitLimit = 60) : WebApplicationFactory<Program>
 {

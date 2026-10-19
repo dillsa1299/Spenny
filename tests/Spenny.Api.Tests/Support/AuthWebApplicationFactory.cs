@@ -6,19 +6,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Spenny.Api.Auth.DependencyInjection;
-using Spenny.Api.Auth.Identity;
 using Spenny.Api.Data;
 
-namespace Spenny.Api.Tests;
+namespace Spenny.Api.Tests.Support;
 
-public sealed class AuthWebApplicationFactory : WebApplicationFactory<Program>, IDisposable
+public class AuthWebApplicationFactory : WebApplicationFactory<Program>, IDisposable
 {
     private readonly SqliteConnection _connection = new($"DataSource=spenny-auth-{Guid.NewGuid():N};Mode=Memory;Cache=Shared");
     private readonly bool _googleConfigured;
+    private readonly Action<IServiceCollection>? _configureTestServices;
 
-    public AuthWebApplicationFactory(bool googleConfigured = false)
+    public AuthWebApplicationFactory(
+        bool googleConfigured = false,
+        Action<IServiceCollection>? configureTestServices = null)
     {
         _googleConfigured = googleConfigured;
+        _configureTestServices = configureTestServices;
         _connection.Open();
     }
 
@@ -38,6 +41,7 @@ public sealed class AuthWebApplicationFactory : WebApplicationFactory<Program>, 
         {
             services.AddDbContext<SpennyDbContext>(options => options.UseSqlite(_connection));
             services.AddSpennyAuth(context.Configuration);
+            _configureTestServices?.Invoke(services);
         });
     }
 

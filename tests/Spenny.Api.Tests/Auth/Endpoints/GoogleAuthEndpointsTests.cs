@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Spenny.Api.Auth.Identity;
-using Spenny.Api.Data;
+using Spenny.Api.Tests.Support;
 
-namespace Spenny.Api.Tests;
+namespace Spenny.Api.Tests.Auth.Endpoints;
 
-public class GoogleAuthEndpointTests
+public class GoogleAuthEndpointsTests
 {
     [Fact]
     public async Task Providers_ReturnsGoogleFalse_WhenNotConfigured()

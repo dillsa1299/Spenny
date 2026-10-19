@@ -12,6 +12,7 @@ internal static class ProjectionTestFixtures
         DateOnly anchor,
         SpendingFrequency frequency,
         bool roundWeekend = false,
-        SpendingCategory category = SpendingCategory.General) =>
-        new(id, name, amount, anchor, frequency, category, roundWeekend);
+        SpendingCategory category = SpendingCategory.General,
+        DateTimeOffset? createdAtUtc = null) =>
+        new(id, name, amount, anchor, frequency, category, roundWeekend, null, createdAtUtc ?? default);
 }

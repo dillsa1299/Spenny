@@ -5,8 +5,11 @@ import Typography from '@mui/material/Typography'
 
 export function IncomePage() {
   return (
-    <Stack spacing={2.5}>
-      <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
+    <Stack spacing={{ xs: 2, sm: 2.5 }} sx={{ width: '100%', minWidth: 0 }}>
+      <Typography
+        variant="h4"
+        sx={{ fontWeight: 700, letterSpacing: '-0.02em', fontSize: { xs: '1.5rem', sm: '2.125rem' } }}
+      >
         Income
       </Typography>
       <Paper
