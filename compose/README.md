@@ -46,18 +46,19 @@ You can run the CI merge locally to reproduce the pipeline; it is **not** the de
 
 ## Self-hosted deploy (homeserver)
 
-Production-style deploy uses [`docker-compose.deploy.yml`](docker-compose.deploy.yml): nginx serves the SPA and proxies `/api` to the API container; Postgres is not published to the host. Server env files are documented in [`.env.deploy.example`](../.env.deploy.example).
+Production-style deploy uses [`docker-compose.deploy.yml`](docker-compose.deploy.yml): nginx serves the SPA and proxies `/api` to the API container; Postgres is not published to the host. Config template: [`.env.deploy.example`](../.env.deploy.example). Actions deploys use GitHub Environment secret **`SPENNY_DOTENV`** (see [docs/deploy/self-hosted.md](../docs/deploy/self-hosted.md)).
 
 ```bash
+export SPENNY_ENV_FILE=/path/to/your.env
 docker compose \
   -f compose/docker-compose.yml \
   -f compose/docker-compose.deploy.yml \
-  --env-file /opt/spenny/dev/.env \
+  --env-file "$SPENNY_ENV_FILE" \
   -p spenny-dev \
   up -d --build
 ```
 
-GitHub Actions deploy workflows build on a **self-hosted runner** and stream logs to Actions. See [docs/deploy/self-hosted.md](../docs/deploy/self-hosted.md).
+GitHub Actions deploy workflows build on a **self-hosted runner** and stream logs to Actions.
 
 ## Connection string
 
