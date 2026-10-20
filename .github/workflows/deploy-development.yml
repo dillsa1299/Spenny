@@ -1,0 +1,63 @@
+# Deploys to the self-hosted development stack after CI succeeds on a push to main.
+# Requires a runner with labels: self-hosted, spenny
+name: Deploy development
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: deploy-development
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: [self-hosted, spenny]
+    environment: development
+    permissions:
+      contents: read
+    env:
+      SPENNY_ENV_FILE: /opt/spenny/dev/.env
+      COMPOSE_PROJECT_NAME: spenny-dev
+    steps:
+      - name: Checkout commit that passed CI
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Deploy stack
+        run: |
+          docker compose \
+            -f compose/docker-compose.yml \
+            -f compose/docker-compose.deploy.yml \
+            --env-file "$SPENNY_ENV_FILE" \
+            -p "$COMPOSE_PROJECT_NAME" \
+            up -d --build
+
+      - name: Health check
+        run: |
+          port="$(grep -E '^SPENNY_CLIENT_HOST_PORT=' "$SPENNY_ENV_FILE" | head -1 | cut -d= -f2- | tr -d '\r')"
+          port="${port:-8080}"
+          for i in $(seq 1 60); do
+            if curl -sf "http://127.0.0.1:${port}/api/health" && curl -sf "http://127.0.0.1:${port}/"; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Stack did not become ready in time"
+          exit 1
+
+      - name: Compose logs on failure
+        if: failure()
+        run: |
+          docker compose \
+            -f compose/docker-compose.yml \
+            -f compose/docker-compose.deploy.yml \
+            --env-file "$SPENNY_ENV_FILE" \
+            -p "$COMPOSE_PROJECT_NAME" \
+            logs
