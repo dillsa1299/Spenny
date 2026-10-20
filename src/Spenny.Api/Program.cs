@@ -85,6 +85,17 @@ if (app.Services.IsAuthConfigured())
 
 app.UseAuthorization();
 
+// Lets the SPA read ASP.NET Core environment on routes that share Cloudflare Access with the app (health may not).
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api"))
+    {
+        context.Response.Headers["X-Spenny-Environment"] = app.Environment.EnvironmentName;
+    }
+
+    await next();
+});
+
 var api = app.MapGroup("/api").RequireRateLimiting(apiRateLimitPolicy);
 
 if (app.Services.IsAuthConfigured())

@@ -12,11 +12,14 @@ describe('useShowDevelopmentBanner', () => {
     vi.mocked(apiFetch).mockReset()
   })
 
-  it('returns true when health reports Development', async () => {
-    vi.mocked(apiFetch).mockResolvedValue(
-      new Response(JSON.stringify({ status: 'ok', environment: 'Development' }), {
+  it('returns true when session response includes Development header', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: false }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Spenny-Environment': 'Development',
+        },
       }),
     )
 
@@ -25,20 +28,50 @@ describe('useShowDevelopmentBanner', () => {
     await waitFor(() => {
       expect(result.current).toBe(true)
     })
+    expect(apiFetch).toHaveBeenCalledWith('/api/auth/session')
   })
 
-  it('stays false for Production or failed health', async () => {
-    vi.mocked(apiFetch).mockResolvedValue(
-      new Response(JSON.stringify({ status: 'ok', environment: 'Production' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    )
+  it('returns true when health JSON reports Development', async () => {
+    vi.mocked(apiFetch)
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ authenticated: false }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', 'X-Spenny-Environment': 'Production' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ status: 'ok', environment: 'Development' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      )
 
     const { result } = renderHook(() => useShowDevelopmentBanner())
 
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalled()
+      expect(result.current).toBe(true)
+    })
+  })
+
+  it('stays false for Production', async () => {
+    vi.mocked(apiFetch)
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ authenticated: false }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', 'X-Spenny-Environment': 'Production' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ status: 'ok', environment: 'Production' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      )
+
+    const { result } = renderHook(() => useShowDevelopmentBanner())
+
+    await waitFor(() => {
+      expect(apiFetch).toHaveBeenCalledTimes(2)
     })
     expect(result.current).toBe(false)
   })
