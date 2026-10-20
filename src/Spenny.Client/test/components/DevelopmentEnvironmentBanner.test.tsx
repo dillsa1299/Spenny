@@ -12,11 +12,14 @@ describe('DevelopmentEnvironmentBanner', () => {
     vi.mocked(apiFetch).mockReset()
   })
 
-  it('renders when health reports Development environment', async () => {
-    vi.mocked(apiFetch).mockResolvedValue(
-      new Response(JSON.stringify({ status: 'ok', environment: 'Development' }), {
+  it('renders when session response includes Development header', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: false }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Spenny-Environment': 'Development',
+        },
       }),
     )
     render(<DevelopmentEnvironmentBanner />)
@@ -25,23 +28,32 @@ describe('DevelopmentEnvironmentBanner', () => {
     })
   })
 
-  it('renders nothing for Production or failed health', async () => {
-    vi.mocked(apiFetch).mockResolvedValue(
-      new Response(JSON.stringify({ status: 'ok', environment: 'Production' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    )
+  it('renders nothing for Production or failed probes', async () => {
+    vi.mocked(apiFetch)
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ authenticated: false }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', 'X-Spenny-Environment': 'Production' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ status: 'ok', environment: 'Production' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      )
     const { container: prod } = render(<DevelopmentEnvironmentBanner />)
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalled()
+      expect(apiFetch).toHaveBeenCalledTimes(2)
     })
     expect(prod).toBeEmptyDOMElement()
 
-    vi.mocked(apiFetch).mockResolvedValue(new Response(null, { status: 503 }))
+    vi.mocked(apiFetch)
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
     const { container: failed } = render(<DevelopmentEnvironmentBanner />)
     await waitFor(() => {
-      expect(apiFetch).toHaveBeenCalledTimes(2)
+      expect(apiFetch).toHaveBeenCalledTimes(4)
     })
     expect(failed).toBeEmptyDOMElement()
   })
