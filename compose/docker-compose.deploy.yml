@@ -1,0 +1,32 @@
+# Self-hosted deploy overlay: API + client (nginx proxies /api) + Postgres on the Docker network only.
+# docker compose -f compose/docker-compose.yml -f compose/docker-compose.deploy.yml --env-file /path/.env -p spenny-dev up -d --build
+services:
+  postgres:
+    ports: !reset []
+    # Allow spenny-dev and spenny-prod on one host (base file pins spenny-postgres for local dev).
+    container_name: !reset null
+
+  api:
+    build:
+      context: ../src/Spenny.Api
+      dockerfile: Dockerfile
+    env_file:
+      - ${SPENNY_ENV_FILE}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      Auth__SpaBaseUrl: ${Auth__SpaBaseUrl}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  client:
+    build:
+      context: ../src/Spenny.Client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ""
+    ports:
+      - "${SPENNY_CLIENT_HOST_PORT:-8080}:80"
+    depends_on:
+      - api

@@ -94,7 +94,8 @@ if (app.Services.IsAuthConfigured())
     api.MapGoogleAuthEndpoints();
 }
 
-api.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+api.MapGet("/health", (IHostEnvironment environment) =>
+        Results.Ok(new { status = "ok", environment = environment.EnvironmentName }))
     .AllowAnonymous()
     .WithName("GetHealth");
 

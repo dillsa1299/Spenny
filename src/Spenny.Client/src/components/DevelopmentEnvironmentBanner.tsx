@@ -1,9 +1,11 @@
-// Sticky strip shown only on the development deployment build (not local Vite dev unless configured).
+// Sticky strip when the API runs under ASP.NET Core Development (see GET /api/health).
 import Box from '@mui/material/Box'
-import { isDevelopmentDeployment } from '@/lib/deploymentEnvironment'
+import { useShowDevelopmentBanner } from '@/lib/deploymentEnvironment'
 
 export function DevelopmentEnvironmentBanner() {
-  if (!isDevelopmentDeployment()) {
+  const show = useShowDevelopmentBanner()
+
+  if (!show) {
     return null
   }
 
