@@ -5,6 +5,7 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import type { ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+import { glassPanelSx } from '@/theme/surfaces'
 
 type AuthFormLayoutProps = {
   title: string
@@ -29,13 +30,7 @@ export function AuthFormLayout({ title, subtitle, children }: AuthFormLayoutProp
           maxWidth: 420,
           p: 3,
           borderRadius: 3,
-          backgroundColor: 'rgba(255,255,255,0.06)',
-          backdropFilter: 'blur(20px) saturate(160%)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          '@media (prefers-reduced-transparency: reduce)': {
-            backdropFilter: 'none',
-            backgroundColor: 'background.paper',
-          },
+          ...glassPanelSx,
         }}
       >
         <Stack spacing={2.5}>

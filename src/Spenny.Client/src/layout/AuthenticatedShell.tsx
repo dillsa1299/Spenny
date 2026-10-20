@@ -1,14 +1,19 @@
-// Signed-in shell: bottom tab navigation, translucent chrome, shared month context for main tabs.
+// Signed-in shell: top bar, bottom tab navigation, shared month context for main tabs.
 import type { ReactNode } from 'react'
+import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import BottomNavigation from '@mui/material/BottomNavigation'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction'
 import Container from '@mui/material/Container'
+import IconButton from '@mui/material/IconButton'
+import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
-import { HandCoins, LayoutDashboard, User, Wallet } from 'lucide-react'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { HandCoins, LayoutDashboard, LogOut, User, Wallet } from 'lucide-react'
+import { Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
+import { welcomeDisplayName } from '@/lib/welcomeDisplayName'
 import { SelectedMonthProvider } from '@/month/SelectedMonthContext'
+import { shellAppBarSx, shellNavChromeSx } from '@/theme/surfaces'
 
 const tabPressSx = {
   transition: 'transform 100ms ease-out',
@@ -17,16 +22,6 @@ const tabPressSx = {
   },
   '&:active': {
     transform: 'scale(0.97)',
-  },
-}
-
-const chromeSx = {
-  backgroundColor: 'rgba(13, 17, 23, 0.72)',
-  backdropFilter: 'blur(20px) saturate(160%)',
-  borderColor: 'rgba(255,255,255,0.08)',
-  '@media (prefers-reduced-transparency: reduce)': {
-    backdropFilter: 'none',
-    backgroundColor: 'background.paper',
   },
 }
 
@@ -51,12 +46,54 @@ function tabIndexForPath(pathname: string): number {
 export function AuthenticatedShell() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const tabIndex = tabIndexForPath(location.pathname)
+  const greetingName = welcomeDisplayName(user)
 
   return (
     <SelectedMonthProvider>
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <AppBar position="sticky" elevation={0} sx={shellAppBarSx}>
+          <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 64 } }}>
+            <Typography
+              component={RouterLink}
+              to="/dashboard"
+              variant="h6"
+              sx={{
+                textDecoration: 'none',
+                color: 'inherit',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                flexShrink: 0,
+              }}
+            >
+              Spenny
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                textAlign: 'center',
+                fontWeight: 600,
+                color: 'text.secondary',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Welcome back {greetingName}
+            </Typography>
+            <IconButton
+              color="inherit"
+              aria-label="Sign out"
+              onClick={() => signOut()}
+              sx={{ flexShrink: 0 }}
+            >
+              <LogOut size={22} aria-hidden />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
         <Container
           component="main"
           maxWidth="sm"
@@ -66,21 +103,11 @@ export function AuthenticatedShell() {
             display: 'flex',
             flexDirection: 'column',
             px: 2,
-            pt: 3,
+            pt: 2,
             pb: 10,
             width: '100%',
           }}
         >
-          {user?.displayName ? (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: 1.5, fontWeight: 500 }}
-              aria-label={`Signed in as ${user.displayName}`}
-            >
-              {user.displayName}
-            </Typography>
-          ) : null}
           <Outlet />
         </Container>
         <Box
@@ -92,8 +119,7 @@ export function AuthenticatedShell() {
             left: 0,
             right: 0,
             zIndex: (theme) => theme.zIndex.appBar,
-            borderTop: '1px solid',
-            ...chromeSx,
+            ...shellNavChromeSx,
           }}
         >
           <Container maxWidth="sm" disableGutters>

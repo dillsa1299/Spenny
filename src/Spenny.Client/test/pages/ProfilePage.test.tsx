@@ -32,12 +32,13 @@ describe('ProfilePage', () => {
     vi.clearAllMocks()
   })
 
-  it('shows sign out for a signed-in user', async () => {
+  it('does not show a page-level sign out control', async () => {
     renderProfile()
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+      expect(screen.getByLabelText(/Display name/i)).toBeInTheDocument()
     })
+    expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument()
   })
 
   it('shows password section for local accounts', async () => {
@@ -52,9 +53,10 @@ describe('ProfilePage', () => {
     renderProfile(googleSession)
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+      expect(screen.getByLabelText(/Display name/i)).toBeInTheDocument()
     })
     expect(screen.queryByLabelText(/Current password/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument()
   })
 
   it('saves display name via API and refreshes session', async () => {

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { fetchSession } from '@/api/authApi'
+import { fetchSession, logout } from '@/api/authApi'
 import { AuthProvider } from '@/auth/AuthContext'
 import { AuthenticatedShell } from '@/layout/AuthenticatedShell'
 import { verifiedSession } from '@/test/sessionFixtures'
@@ -40,6 +40,30 @@ describe('AuthenticatedShell', () => {
     expect(spendingTab).toHaveClass('Mui-selected')
   })
 
+  it('shows welcome copy for the signed-in user', async () => {
+    renderShell('/dashboard')
+
+    await waitFor(() => {
+      expect(screen.getByText('Welcome back Verified User')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('link', { name: 'Spenny' })).toHaveAttribute('href', '/dashboard')
+  })
+
+  it('sign out invokes logout', async () => {
+    const user = userEvent.setup()
+    renderShell('/profile')
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Profile page' })).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Sign out' }))
+
+    await waitFor(() => {
+      expect(logout).toHaveBeenCalledTimes(1)
+    })
+  })
+
   it('navigates when a bottom tab is pressed', async () => {
     const user = userEvent.setup()
     renderShell('/dashboard')
@@ -47,8 +71,6 @@ describe('AuthenticatedShell', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Dashboard page' })).toBeInTheDocument()
     })
-
-    expect(screen.getByLabelText('Signed in as Verified User')).toHaveTextContent('Verified User')
 
     await user.click(screen.getByRole('button', { name: 'Income' }))
 

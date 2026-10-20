@@ -9,6 +9,7 @@ import { BurndownChart } from '@/components/spending/BurndownChart'
 import { ComingUpList } from '@/components/spending/ComingUpList'
 import { landingDemoMonth } from '@/landing/landingDemoMonth'
 import { comingUpEmptyMessage } from '@/spending/comingUpCopy'
+import { glassPanelInsetSx, glassPanelSx, pillChipSx } from '@/theme/surfaces'
 
 const demo = landingDemoMonth
 
@@ -26,22 +27,23 @@ const demoSectionSx = {
 const demoHeaderSurfaceSx = {
   p: { xs: 2.25, sm: 3 },
   pb: { xs: 2, sm: 2.25 },
-  backgroundColor: 'rgba(22, 27, 34, 0.55)',
-  backdropFilter: 'blur(28px) saturate(165%)',
-  '@media (prefers-reduced-transparency: reduce)': {
-    backdropFilter: 'none',
-    backgroundColor: 'background.paper',
-  },
+  ...glassPanelSx,
+  border: 'none',
 }
 
 const demoChartBlockSx = {
-  p: { xs: 2.25, sm: 3 },
-  pt: { xs: 2, sm: 2.25 },
+  position: 'relative',
   borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-  backgroundColor: 'background.paper',
   '@media (prefers-reduced-transparency: reduce)': {
     borderTopColor: 'divider',
   },
+}
+
+const demoChartContentSx = {
+  position: 'relative',
+  zIndex: 1,
+  p: { xs: 2.25, sm: 3 },
+  pt: { xs: 2, sm: 2.25 },
 }
 
 export function LandingPage() {
@@ -109,12 +111,7 @@ export function LandingPage() {
                   fontWeight: 600,
                   letterSpacing: '0.01em',
                   color: 'text.primary',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                  '@media (prefers-reduced-transparency: reduce)': {
-                    backgroundColor: 'action.hover',
-                    borderColor: 'divider',
-                  },
+                  ...pillChipSx,
                 }}
               >
                 {label}
@@ -187,6 +184,11 @@ export function LandingPage() {
           </Box>
 
           <Box sx={demoChartBlockSx}>
+            <Box
+              aria-hidden
+              sx={[{ position: 'absolute', inset: 0, pointerEvents: 'none' }, glassPanelInsetSx]}
+            />
+            <Box sx={demoChartContentSx}>
             <BurndownChart
               year={demo.year}
               month={demo.month}
@@ -211,6 +213,7 @@ export function LandingPage() {
                 emptyMessage={comingUpEmptyMessage(demo)}
               />
             </Stack>
+            </Box>
           </Box>
         </Box>
       </Stack>

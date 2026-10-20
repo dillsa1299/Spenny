@@ -31,8 +31,10 @@ export function BurndownAxisTooltip(props: ChartsTooltipProps<'axis'>) {
       // step line instead of covering the remaining-balance headline above the plot.
       anchor="node"
       position="top"
-      // Portal to the body so an ancestor with backdrop-filter cannot become the containing block.
+      // MUI X defaults the popper container to the chart layer; mount on body so frosted ancestors
+      // cannot skew fixed-strategy placement (landing demo header keeps backdrop-filter).
       disablePortal={false}
+      container={() => document.body}
       {...containerProps}
     >
       <BurndownDayTooltipContent summary={summary} />
