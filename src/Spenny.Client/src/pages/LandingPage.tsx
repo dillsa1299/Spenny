@@ -39,13 +39,6 @@ const demoChartBlockSx = {
   },
 }
 
-const demoChartGlassLayerSx = {
-  position: 'absolute',
-  inset: 0,
-  pointerEvents: 'none',
-  ...glassPanelInsetSx,
-}
-
 const demoChartContentSx = {
   position: 'relative',
   zIndex: 1,
@@ -191,7 +184,10 @@ export function LandingPage() {
           </Box>
 
           <Box sx={demoChartBlockSx}>
-            <Box aria-hidden sx={demoChartGlassLayerSx} />
+            <Box
+              aria-hidden
+              sx={[{ position: 'absolute', inset: 0, pointerEvents: 'none' }, glassPanelInsetSx]}
+            />
             <Box sx={demoChartContentSx}>
             <BurndownChart
               year={demo.year}
