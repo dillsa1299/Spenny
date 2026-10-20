@@ -9,7 +9,8 @@ Tracked in GitHub issue [#29](https://github.com/dillsa1299/Spenny/issues/29).
 - **CI** stays on GitHub-hosted `ubuntu-24.04` (tests + compose smoke).
 - **Deploy jobs** run on a **self-hosted runner** on your homeserver (`runs-on: [self-hosted, spenny]`).
 - Each deploy runs `docker compose ... up -d --build` on the server; output streams to the Actions run log.
-- **Development** (`spenny-dev`) and **production** (`spenny-prod`) are separate Compose projects with separate Postgres volumes and env files.
+- **Development** (`spenny-dev`) and **production** (`spenny-prod`) are separate Compose projects with separate Postgres volumes and config.
+- Deploy config is stored in GitHub **Environment** secret **`SPENNY_DOTENV`** (full `.env` contents per environment), written to a temp file on each deploy run.
 
 Do **not** attach the self-hosted runner to PR workflows from forks. Use it only for the deploy workflows in this repo.
 
@@ -18,14 +19,6 @@ Do **not** attach the self-hosted runner to PR workflows from forks. Use it only
 - Linux host with **Docker Engine** and **Compose v2** (deploy overlay uses Compose `!reset` for Postgres ports; use a current Compose 2.x).
 - Outbound HTTPS to `github.com` (the runner polls GitHub; no inbound SSH required for deploy).
 - `curl` available on the runner host (health checks).
-
-Directory layout:
-
-```text
-/opt/spenny/
-  dev/.env      # copy from .env.deploy.example
-  prod/.env     # different secrets, ports, Auth__SpaBaseUrl
-```
 
 Optional: **Caddy** or **Traefik** on the host for TLS and hostnames (`dev.example.com` → dev client port, `app.example.com` → prod). See [ADR 0001](../adr/0001-defer-access-control-to-hosting-edge.md) before exposing real user data publicly.
 
@@ -37,62 +30,57 @@ Optional: **Caddy** or **Traefik** on the host for TLS and hostnames (`dev.examp
 
 The runner user must be able to run `docker compose` (often: add the user to the `docker` group).
 
-## 3. Environment files on the server
+## 3. Deploy configuration (GitHub Environments)
 
-Copy [`.env.deploy.example`](../../.env.deploy.example) to each path:
-
-```bash
-sudo mkdir -p /opt/spenny/dev /opt/spenny/prod
-sudo cp .env.deploy.example /opt/spenny/dev/.env
-sudo cp .env.deploy.example /opt/spenny/prod/.env
-# edit both — unique passwords, Auth__SpaBaseUrl, SPENNY_CLIENT_HOST_PORT
-```
+Template: [`.env.deploy.example`](../../.env.deploy.example). Build **two** variants (dev and prod) with different ports, URLs, and passwords.
 
 | Setting | Development example | Production example |
 |--------|---------------------|--------------------|
 | `SPENNY_CLIENT_HOST_PORT` | `8080` | `8081` |
+| `ASPNETCORE_ENVIRONMENT` | `Development` | `Production` |
 | `Auth__SpaBaseUrl` | `https://dev.example.com` | `https://app.example.com` |
 | `POSTGRES_PASSWORD` | unique | unique |
 
 Google OAuth redirect URI per environment: `{Auth__SpaBaseUrl}/api/auth/google/callback`.
 
-The Actions runner user must read these files (default: `github-runner`):
-
-```bash
-sudo chown root:github-runner /opt/spenny/dev /opt/spenny/prod
-sudo chown root:github-runner /opt/spenny/dev/.env /opt/spenny/prod/.env
-sudo chmod 750 /opt/spenny/dev /opt/spenny/prod
-sudo chmod 640 /opt/spenny/dev/.env /opt/spenny/prod/.env
-```
-
-## 4. GitHub Environments
-
 In the repo: **Settings → Environments**
 
-| Name | Used by | Suggestion |
-|------|---------|------------|
-| `development` | [deploy-development.yml](../../.github/workflows/deploy-development.yml) | No extra gates |
-| `production` | [deploy-production.yml](../../.github/workflows/deploy-production.yml) | Optional required reviewers |
+| Name | Used by | Secret |
+|------|---------|--------|
+| `development` | [deploy-development.yml](../../.github/workflows/deploy-development.yml) | **`SPENNY_DOTENV`** — entire dev `.env` body (multiline) |
+| `production` | [deploy-production.yml](../../.github/workflows/deploy-production.yml) | **`SPENNY_DOTENV`** — entire prod `.env` body (multiline) |
 
-Secrets in server `.env` files are enough for v1; add environment secrets only if workflows need them later.
+Same secret **name** in each environment; values are independent. To add or change a variable, edit the secret in GitHub and redeploy (merge to `main` for dev, or run **Deploy production**). No SSH required for routine config changes.
 
-## 5. First manual deploy (smoke test)
+If you already have `/opt/spenny/dev/.env` on the server, copy its contents into the matching GitHub secret once, then use GitHub as the source of truth.
 
-On the server, from a clone at the commit you want:
+**Updating `SPENNY_DOTENV`:** Environment → choose `development` or `production` → **Secrets** → add or update **`SPENNY_DOTENV`**. Paste key=value lines only (comments from the example file are optional and may be omitted).
+
+## 4. GitHub Environment protection (optional)
+
+| Name | Suggestion |
+|------|------------|
+| `development` | No extra gates |
+| `production` | Optional required reviewers before deploy jobs run |
+
+## 5. First deploy (smoke test)
+
+1. Set **`SPENNY_DOTENV`** on the **development** environment (see §3).
+2. Ensure the self-hosted runner is online.
+3. Merge to `main` (or re-run **Deploy development** after a successful CI run on `main`).
+
+For a one-off manual deploy on the server without Actions, save your env to a file and run:
 
 ```bash
-git clone https://github.com/dillsa1299/Spenny.git
-cd Spenny
+export SPENNY_ENV_FILE=/path/to/your.env
 docker compose \
   -f compose/docker-compose.yml \
   -f compose/docker-compose.deploy.yml \
-  --env-file /opt/spenny/dev/.env \
+  --env-file "$SPENNY_ENV_FILE" \
   -p spenny-dev \
   up -d --build
 curl -sf "http://127.0.0.1:8080/api/health"   # port from SPENNY_CLIENT_HOST_PORT
 ```
-
-After the runner is online, merge to `main` and confirm a **Deploy development** run appears under Actions with build output.
 
 ## 6. Production deploy
 
