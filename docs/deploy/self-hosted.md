@@ -56,7 +56,14 @@ sudo cp .env.deploy.example /opt/spenny/prod/.env
 
 Google OAuth redirect URI per environment: `{Auth__SpaBaseUrl}/api/auth/google/callback`.
 
-Restrict file permissions: `chmod 600 /opt/spenny/*/.env`.
+The Actions runner user must read these files (default: `github-runner`):
+
+```bash
+sudo chown root:github-runner /opt/spenny/dev /opt/spenny/prod
+sudo chown root:github-runner /opt/spenny/dev/.env /opt/spenny/prod/.env
+sudo chmod 750 /opt/spenny/dev /opt/spenny/prod
+sudo chmod 640 /opt/spenny/dev/.env /opt/spenny/prod/.env
+```
 
 ## 4. GitHub Environments
 
