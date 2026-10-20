@@ -13,6 +13,7 @@ import { Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-rout
 import { useAuth } from '@/auth/AuthContext'
 import { welcomeDisplayName } from '@/lib/welcomeDisplayName'
 import { SelectedMonthProvider } from '@/month/SelectedMonthContext'
+import { DevelopmentEnvironmentBanner } from '@/components/DevelopmentEnvironmentBanner'
 import { shellAppBarSx, shellNavChromeSx } from '@/theme/surfaces'
 
 const tabPressSx = {
@@ -53,6 +54,7 @@ export function AuthenticatedShell() {
   return (
     <SelectedMonthProvider>
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <DevelopmentEnvironmentBanner />
         <AppBar position="sticky" elevation={0} sx={shellAppBarSx}>
           <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 64 } }}>
             <Typography
