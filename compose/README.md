@@ -44,6 +44,21 @@ docker compose -f compose/docker-compose.yml -f compose/docker-compose.ci.yml --
 
 You can run the CI merge locally to reproduce the pipeline; it is **not** the default local debug workflow (no native F5 / Vite HMR).
 
+## Self-hosted deploy (homeserver)
+
+Production-style deploy uses [`docker-compose.deploy.yml`](docker-compose.deploy.yml): nginx serves the SPA and proxies `/api` to the API container; Postgres is not published to the host. Server env files are documented in [`.env.deploy.example`](../.env.deploy.example).
+
+```bash
+docker compose \
+  -f compose/docker-compose.yml \
+  -f compose/docker-compose.deploy.yml \
+  --env-file /opt/spenny/dev/.env \
+  -p spenny-dev \
+  up -d --build
+```
+
+GitHub Actions deploy workflows build on a **self-hosted runner** and stream logs to Actions. See [docs/deploy/self-hosted.md](../docs/deploy/self-hosted.md).
+
 ## Connection string
 
 Prefer repo-root `.env` (`POSTGRES_*` and optional `ConnectionStrings__Default`). Inside the **api** container (CI), Compose sets `ConnectionStrings__Default` to host `postgres` and port **5432** on the Docker network.
@@ -52,7 +67,7 @@ On the **host** (F5 / `dotnet run`), use `POSTGRES_HOST=localhost` and **`POSTGR
 
 ## Explicit deferrals
 
-- No container registry push from this repo yet.
+- No container registry push from this repo yet (deploy builds images on the self-hosted runner).
 - No Testcontainers in `dotnet test`; CI compose smoke applies migrations when the API container starts.
 
 See [ADR 0002](../docs/adr/0002-dev-database-in-docker-compose.md).

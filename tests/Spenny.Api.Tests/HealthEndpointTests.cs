@@ -19,6 +19,7 @@ public class HealthEndpointTests
         var body = await response.Content.ReadFromJsonAsync<HealthResponse>();
         Assert.NotNull(body);
         Assert.Equal("ok", body.status);
+        Assert.Equal("Development", body.environment);
     }
 
     [Fact]
@@ -39,5 +40,5 @@ public class HealthEndpointTests
         Assert.Equal(HttpStatusCode.TooManyRequests, rejected.StatusCode);
     }
 
-    private sealed record HealthResponse(string status);
+    private sealed record HealthResponse(string status, string environment);
 }
