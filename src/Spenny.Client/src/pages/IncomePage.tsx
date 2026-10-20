@@ -2,6 +2,7 @@
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import { glassPanelSx } from '@/theme/surfaces'
 
 export function IncomePage() {
   return (
@@ -12,18 +13,7 @@ export function IncomePage() {
       >
         Income
       </Typography>
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          borderRadius: 3,
-          backgroundColor: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          '@media (prefers-reduced-transparency: reduce)': {
-            backgroundColor: 'background.paper',
-          },
-        }}
-      >
+      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, ...glassPanelSx }}>
         <Typography variant="overline" sx={{ color: 'primary.main', letterSpacing: '0.12em' }}>
           Coming soon
         </Typography>

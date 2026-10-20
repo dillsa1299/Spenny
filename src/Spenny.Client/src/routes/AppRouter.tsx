@@ -15,11 +15,12 @@ import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { SignInPage } from '@/pages/auth/SignInPage'
 import { SignUpPage } from '@/pages/auth/SignUpPage'
 import { VerifyEmailPage } from '@/pages/auth/VerifyEmailPage'
+import { RouteTitleLayout } from '@/routes/RouteTitleLayout'
 
 /** Route tree shared by BrowserRouter (app) and MemoryRouter (tests). */
 export function AppRouteTree() {
   return (
-    <>
+    <Route element={<RouteTitleLayout />}>
         <Route element={<AppShell />}>
           <Route
             path="/"
@@ -46,7 +47,7 @@ export function AppRouteTree() {
             <Route path="/app" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Route>
-    </>
+    </Route>
   )
 }
 

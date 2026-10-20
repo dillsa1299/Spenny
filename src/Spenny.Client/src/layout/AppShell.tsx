@@ -6,24 +6,12 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { Link as RouterLink, Outlet } from 'react-router-dom'
 import { PressableButton } from '@/components/PressableButton'
+import { shellAppBarSx } from '@/theme/surfaces'
 
 export function AppShell() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <AppBar
-        position="sticky"
-        elevation={0}
-        sx={{
-          backgroundColor: 'rgba(13, 17, 23, 0.55)',
-          backdropFilter: 'blur(20px) saturate(160%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-          '@media (prefers-reduced-transparency: reduce)': {
-            backdropFilter: 'none',
-            backgroundColor: 'background.paper',
-            borderBottomColor: 'divider',
-          },
-        }}
-      >
+      <AppBar position="sticky" elevation={0} sx={shellAppBarSx}>
         <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 64 } }}>
           <Typography
             component={RouterLink}

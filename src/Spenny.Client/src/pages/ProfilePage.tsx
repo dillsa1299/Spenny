@@ -1,4 +1,4 @@
-// Profile: identity, local password change, account deletion, and sign out.
+// Profile: identity, local password change, account deletion (sign out lives in the shell top bar).
 import Alert from '@mui/material/Alert'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -15,7 +15,7 @@ import { useFlashNotice } from '@/flash/FlashNoticeContext'
 import { PressableButton } from '@/components/PressableButton'
 
 export function ProfilePage() {
-  const { user, refresh, signOut, clearSession } = useAuth()
+  const { user, refresh, clearSession } = useAuth()
   const { showFlash } = useFlashNotice()
   const navigate = useNavigate()
 
@@ -155,10 +155,6 @@ export function ProfilePage() {
           Delete account
         </PressableButton>
       </Stack>
-
-      <PressableButton variant="outlined" onClick={() => signOut()}>
-        Sign out
-      </PressableButton>
 
       <Dialog open={deleteOpen} onClose={() => !deleting && setDeleteOpen(false)}>
         <DialogTitle>Delete your account?</DialogTitle>
