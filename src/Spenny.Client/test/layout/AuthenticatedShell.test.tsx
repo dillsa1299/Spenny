@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { fetchSession, logout } from '@/api/authApi'
 import { AuthProvider } from '@/auth/AuthContext'
+import * as authenticatedShellGreetingModule from '@/lib/authenticatedShellGreeting'
 import { AuthenticatedShell } from '@/layout/AuthenticatedShell'
 import { adminSession, verifiedSession } from '@/test/sessionFixtures'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -40,13 +41,20 @@ describe('AuthenticatedShell', () => {
     expect(spendingTab).toHaveClass('Mui-selected')
   })
 
-  it('shows welcome copy for the signed-in user', async () => {
-    renderShell('/dashboard')
+  it('shows time-of-day greeting for the signed-in user', async () => {
+    const greetingSpy = vi
+      .spyOn(authenticatedShellGreetingModule, 'authenticatedShellGreeting')
+      .mockReturnValue('Good morning, Verified User')
+    try {
+      renderShell('/dashboard')
 
-    await waitFor(() => {
-      expect(screen.getByText('Welcome back Verified User')).toBeInTheDocument()
-    })
-    expect(screen.getByRole('link', { name: 'Spenny' })).toHaveAttribute('href', '/dashboard')
+      await waitFor(() => {
+        expect(screen.getByText('Good morning, Verified User')).toBeInTheDocument()
+      })
+      expect(screen.getByRole('link', { name: 'Spenny' })).toHaveAttribute('href', '/dashboard')
+    } finally {
+      greetingSpy.mockRestore()
+    }
   })
 
   it('sign out invokes logout', async () => {
