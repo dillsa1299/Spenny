@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { fetchSession, logout } from '@/api/authApi'
 import { AuthProvider } from '@/auth/AuthContext'
 import { AuthenticatedShell } from '@/layout/AuthenticatedShell'
-import { verifiedSession } from '@/test/sessionFixtures'
+import { adminSession, verifiedSession } from '@/test/sessionFixtures'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 function renderShell(initialPath: string) {
@@ -61,6 +61,15 @@ describe('AuthenticatedShell', () => {
 
     await waitFor(() => {
       expect(logout).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('shows Admin tab only for admin users', async () => {
+    vi.mocked(fetchSession).mockResolvedValue(adminSession)
+    renderShell('/dashboard')
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Admin' })).toBeInTheDocument()
     })
   })
 

@@ -10,4 +10,6 @@ public sealed class SpennyUser : IdentityUser
     public AuthProviderKind AuthProvider { get; set; } = AuthProviderKind.Local;
 
     public bool IsAdmin { get; set; }
+
+    public DateTimeOffset RegisteredAtUtc { get; set; }
 }

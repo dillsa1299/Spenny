@@ -7,6 +7,23 @@ afterEach(() => {
   cleanup()
 })
 
+vi.mock('@/api/adminApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/api/adminApi')>()
+  const emptyStats = {
+    totalUsers: 0,
+    signUpsLast24Hours: 0,
+    signUpsLast7Days: 0,
+    uniqueLoginsLast24Hours: 0,
+    googleAccounts: 0,
+    localAccounts: 0,
+    totalSpendingSeries: 0,
+  }
+  return {
+    ...actual,
+    fetchAdminStats: vi.fn().mockResolvedValue(emptyStats),
+  }
+})
+
 vi.mock('@/api/authApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/api/authApi')>()
   return {

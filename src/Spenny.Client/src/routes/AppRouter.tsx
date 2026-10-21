@@ -1,12 +1,14 @@
 // Application routes: public marketing, auth flows, and authenticated app shell.
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { GuestOnly } from '@/auth/GuestOnly'
+import { RequireAdminLayout } from '@/auth/RequireAdminLayout'
 import { RequireDomainAccessLayout } from '@/auth/RequireDomainAccessLayout'
 import { AppShell } from '@/layout/AppShell'
 import { AuthenticatedShell } from '@/layout/AuthenticatedShell'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { IncomePage } from '@/pages/IncomePage'
 import { LandingPage } from '@/pages/LandingPage'
+import { AdminPage } from '@/pages/AdminPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { SpendingPage } from '@/pages/SpendingPage'
 import { CheckEmailPage } from '@/pages/auth/CheckEmailPage'
@@ -44,6 +46,9 @@ export function AppRouteTree() {
             <Route path="/spending" element={<SpendingPage />} />
             <Route path="/income" element={<IncomePage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route element={<RequireAdminLayout />}>
+              <Route path="/admin" element={<AdminPage />} />
+            </Route>
             <Route path="/app" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Route>

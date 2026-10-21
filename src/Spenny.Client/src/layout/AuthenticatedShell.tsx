@@ -8,7 +8,7 @@ import Container from '@mui/material/Container'
 import IconButton from '@mui/material/IconButton'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
-import { HandCoins, LayoutDashboard, LogOut, User, Wallet } from 'lucide-react'
+import { BarChart2, HandCoins, LayoutDashboard, LogOut, User, Wallet } from 'lucide-react'
 import { Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
 import { welcomeDisplayName } from '@/lib/welcomeDisplayName'
@@ -32,14 +32,20 @@ type ShellTab = {
   icon: ReactNode
 }
 
-const tabs: ShellTab[] = [
+const baseTabs: ShellTab[] = [
   { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={22} aria-hidden /> },
   { path: '/spending', label: 'Spending', icon: <HandCoins size={22} aria-hidden /> },
   { path: '/income', label: 'Income', icon: <Wallet size={22} aria-hidden /> },
   { path: '/profile', label: 'Profile', icon: <User size={22} aria-hidden /> },
 ]
 
-function tabIndexForPath(pathname: string): number {
+const adminTab: ShellTab = {
+  path: '/admin',
+  label: 'Admin',
+  icon: <BarChart2 size={22} aria-hidden />,
+}
+
+function tabIndexForPath(pathname: string, tabs: ShellTab[]): number {
   const index = tabs.findIndex((tab) => pathname === tab.path || pathname.startsWith(`${tab.path}/`))
   return index >= 0 ? index : 0
 }
@@ -48,7 +54,8 @@ export function AuthenticatedShell() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
-  const tabIndex = tabIndexForPath(location.pathname)
+  const tabs = user?.isAdmin ? [...baseTabs, adminTab] : baseTabs
+  const tabIndex = tabIndexForPath(location.pathname, tabs)
   const greetingName = welcomeDisplayName(user)
 
   return (
