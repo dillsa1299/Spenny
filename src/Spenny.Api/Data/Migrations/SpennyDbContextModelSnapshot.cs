@@ -254,6 +254,37 @@ namespace Spenny.Api.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Spenny.Api.Data.Spending.SpendingExceptionEntity", b =>
+                {
+                    b.Property<Guid>("SeriesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("OccurrenceDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsSkipped")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("SeriesId", "OccurrenceDate");
+
+                    b.ToTable("SpendingExceptions");
+                });
+
             modelBuilder.Entity("Spenny.Api.Data.Spending.SpendingSeriesEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -351,6 +382,17 @@ namespace Spenny.Api.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Spenny.Api.Data.Spending.SpendingExceptionEntity", b =>
+                {
+                    b.HasOne("Spenny.Api.Data.Spending.SpendingSeriesEntity", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("Spenny.Api.Data.Spending.SpendingSeriesEntity", b =>

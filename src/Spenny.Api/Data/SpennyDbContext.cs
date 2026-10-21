@@ -13,6 +13,8 @@ public sealed class SpennyDbContext(DbContextOptions<SpennyDbContext> options)
 
     public DbSet<SpendingSeriesEntity> SpendingSeries => Set<SpendingSeriesEntity>();
 
+    public DbSet<SpendingExceptionEntity> SpendingExceptions => Set<SpendingExceptionEntity>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -39,6 +41,18 @@ public sealed class SpennyDbContext(DbContextOptions<SpennyDbContext> options)
             entity.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<SpendingExceptionEntity>(entity =>
+        {
+            entity.HasKey(e => new { e.SeriesId, e.OccurrenceDate });
+            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Category).HasConversion<string>().HasMaxLength(32);
+            entity.HasOne(e => e.Series)
+                .WithMany()
+                .HasForeignKey(e => e.SeriesId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

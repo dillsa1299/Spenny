@@ -25,6 +25,8 @@ public static class SpendingEndpoints
         spending.MapPost("/series", CreateSeriesAsync);
         spending.MapPut("/series/{id:guid}", UpdateSeriesAsync);
         spending.MapDelete("/series/{id:guid}", DeleteSeriesAsync);
+        spending.MapPut("/series/{seriesId:guid}/exceptions/{occurrenceDate}", UpsertExceptionAsync);
+        spending.MapDelete("/series/{seriesId:guid}/exceptions/{occurrenceDate}", SkipOccurrenceAsync);
         spending.MapGet("/months/{year:int}/{month:int}", GetMonthAsync);
 
         return api;
@@ -164,11 +166,116 @@ public static class SpendingEndpoints
             .Where(s => s.UserId == userId)
             .ToListAsync(cancellationToken);
 
+        var seriesIds = entities.Select(s => s.Id).ToList();
+        var exceptionEntities = await db.SpendingExceptions
+            .AsNoTracking()
+            .Where(e => seriesIds.Contains(e.SeriesId))
+            .ToListAsync(cancellationToken);
+
         var series = entities.Select(SpendingSeriesMapper.ToDomain).ToList();
+        var exceptions = exceptionEntities.Select(SpendingExceptionMapper.ToDomain).ToList();
         var asOfDate = LondonCalendar.TodayInLondon(timeProvider);
-        var projection = SpendingMonthProjection.Project(series, [], year, month, asOfDate);
+        var projection = SpendingMonthProjection.Project(series, exceptions, year, month, asOfDate);
 
         return Results.Ok(MonthResponse.FromProjection(year, month, asOfDate, projection));
+    }
+
+    private static async Task<IResult> UpsertExceptionAsync(
+        Guid seriesId,
+        DateOnly occurrenceDate,
+        [FromBody] ExceptionWriteRequest request,
+        ClaimsPrincipal user,
+        SpennyDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var userId = RequireUserId(user);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var series = await db.SpendingSeries
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == seriesId && s.UserId == userId, cancellationToken);
+        if (series is null)
+        {
+            return Results.NotFound();
+        }
+
+        if (!TryValidateExceptionWrite(request, out var validated, out var validationProblem))
+        {
+            return validationProblem!;
+        }
+
+        var entity = await db.SpendingExceptions
+            .FirstOrDefaultAsync(
+                e => e.SeriesId == seriesId && e.OccurrenceDate == occurrenceDate,
+                cancellationToken);
+
+        if (entity is null)
+        {
+            entity = new SpendingExceptionEntity
+            {
+                SeriesId = seriesId,
+                OccurrenceDate = occurrenceDate,
+            };
+            db.SpendingExceptions.Add(entity);
+        }
+
+        SpendingExceptionMapper.Apply(entity, validated!);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return Results.Ok(ExceptionResponse.FromEntity(entity));
+    }
+
+    private static async Task<IResult> SkipOccurrenceAsync(
+        Guid seriesId,
+        DateOnly occurrenceDate,
+        ClaimsPrincipal user,
+        SpennyDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var userId = RequireUserId(user);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var series = await db.SpendingSeries
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == seriesId && s.UserId == userId, cancellationToken);
+        if (series is null)
+        {
+            return Results.NotFound();
+        }
+
+        var entity = await db.SpendingExceptions
+            .FirstOrDefaultAsync(
+                e => e.SeriesId == seriesId && e.OccurrenceDate == occurrenceDate,
+                cancellationToken);
+
+        if (entity is null)
+        {
+            entity = new SpendingExceptionEntity
+            {
+                SeriesId = seriesId,
+                OccurrenceDate = occurrenceDate,
+                IsSkipped = true,
+            };
+            db.SpendingExceptions.Add(entity);
+        }
+        else
+        {
+            entity.IsSkipped = true;
+            entity.Name = null;
+            entity.Amount = null;
+            entity.Category = null;
+            entity.Description = null;
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        return Results.NoContent();
     }
 
     private static string? RequireUserId(ClaimsPrincipal user) =>
@@ -231,6 +338,91 @@ public static class SpendingEndpoints
             string.IsNullOrEmpty(description) ? null : description);
 
         return true;
+    }
+
+    private static bool TryValidateExceptionWrite(
+        ExceptionWriteRequest request,
+        out UpsertSpendingExceptionRequest? validated,
+        out IResult? problem)
+    {
+        validated = null;
+        problem = null;
+
+        if (request.IsSkipped)
+        {
+            validated = new UpsertSpendingExceptionRequest(true, null, null, null, null);
+            return true;
+        }
+
+        var errors = new Dictionary<string, string[]>();
+
+        var name = request.Name?.Trim();
+        if (string.IsNullOrEmpty(name))
+        {
+            errors["name"] = ["Name is required."];
+        }
+        else if (name.Length > MaxNameLength)
+        {
+            errors["name"] = [$"Name must be at most {MaxNameLength} characters."];
+        }
+
+        if (request.Amount is null or <= 0)
+        {
+            errors["amount"] = ["Amount must be greater than zero."];
+        }
+
+        if (request.Category is null || !Enum.IsDefined(request.Category.Value))
+        {
+            errors["category"] = ["Category is invalid."];
+        }
+
+        var description = request.Description?.Trim();
+        if (description?.Length > MaxDescriptionLength)
+        {
+            errors["description"] = [$"Description must be at most {MaxDescriptionLength} characters."];
+        }
+
+        if (errors.Count > 0)
+        {
+            problem = Results.ValidationProblem(errors);
+            return false;
+        }
+
+        validated = new UpsertSpendingExceptionRequest(
+            false,
+            name,
+            request.Amount,
+            request.Category,
+            string.IsNullOrEmpty(description) ? null : description);
+
+        return true;
+    }
+
+    private sealed record ExceptionWriteRequest(
+        bool IsSkipped,
+        string? Name,
+        decimal? Amount,
+        SpendingCategory? Category,
+        string? Description);
+
+    private sealed record ExceptionResponse(
+        Guid SeriesId,
+        DateOnly OccurrenceDate,
+        bool IsSkipped,
+        string? Name,
+        decimal? Amount,
+        SpendingCategory? Category,
+        string? Description)
+    {
+        public static ExceptionResponse FromEntity(SpendingExceptionEntity entity) =>
+            new(
+                entity.SeriesId,
+                entity.OccurrenceDate,
+                entity.IsSkipped,
+                entity.Name,
+                entity.Amount,
+                entity.Category,
+                entity.Description);
     }
 
     private sealed record SeriesWriteRequest(

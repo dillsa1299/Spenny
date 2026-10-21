@@ -85,6 +85,14 @@ export type SpendingSeriesWrite = {
   description?: string | null
 }
 
+export type SpendingExceptionWrite = {
+  isSkipped: boolean
+  name?: string | null
+  amount?: number | null
+  category?: SpendingCategoryValue | null
+  description?: string | null
+}
+
 export const SPENDING_FREQUENCY_OPTIONS: { value: SpendingFrequencyValue; label: string }[] = [
   { value: SpendingFrequency.OneOff, label: 'One-off' },
   { value: SpendingFrequency.Weekly, label: 'Weekly' },
