@@ -5,7 +5,7 @@ import { fetchSession, logout } from '@/api/authApi'
 import * as monthKey from '@/lib/monthKey'
 import { AppRouteTree } from '@/routes/AppRouter'
 import { renderAppAt, stubGuestSession } from '@/test/renderApp'
-import { unverifiedSession, verifiedSession } from '@/test/sessionFixtures'
+import { adminSession, unverifiedSession, verifiedSession } from '@/test/sessionFixtures'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 function expectSignInPage(): void {
@@ -101,6 +101,26 @@ describe('App routing', { timeout: 15_000 }, () => {
 
     await screen.findByRole('heading', { name: 'Spending' })
     expect(monthLabelInShell()).toHaveTextContent(monthAfterAdvance)
+  })
+
+  it('shows not found for non-admin users on /admin', async () => {
+    vi.mocked(fetchSession).mockResolvedValue(verifiedSession)
+    renderAppAt({ initialPath: '/admin' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
+    })
+    expect(screen.queryByRole('button', { name: 'Admin' })).not.toBeInTheDocument()
+  })
+
+  it('lets admin users reach the Admin route and tab', async () => {
+    vi.mocked(fetchSession).mockResolvedValue(adminSession)
+    renderAppAt({ initialPath: '/admin' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Admin' })).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: 'Admin' })).toBeInTheDocument()
   })
 
   it('Profile sign-out calls logout API', async () => {

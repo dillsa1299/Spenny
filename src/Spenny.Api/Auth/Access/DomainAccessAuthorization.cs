@@ -14,9 +14,11 @@ public static class DomainAccessAuthorization
         services.AddAuthorizationBuilder()
             .AddPolicy(PolicyName, policy =>
                 policy.RequireAuthenticatedUser()
-                    .AddRequirements(new DomainAccessRequirement()));
+                    .AddRequirements(new DomainAccessRequirement()))
+            .AddAdminAccessPolicy();
 
         services.AddScoped<IAuthorizationHandler, DomainAccessHandler>();
+        services.AddScoped<IAuthorizationHandler, AdminAccessHandler>();
         return services;
     }
 }

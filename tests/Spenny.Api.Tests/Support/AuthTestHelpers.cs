@@ -44,4 +44,42 @@ internal static class AuthTestHelpers
         var login = await client.PostAsJsonAsync("/api/auth/login", new { email, password = DefaultPassword });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
     }
+
+    internal static async Task MakeAdminAsync(AuthWebApplicationFactory factory, string email)
+    {
+        using var scope = factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<SpennyUser>>();
+        var user = await userManager.FindByEmailAsync(email);
+        Assert.NotNull(user);
+        user.IsAdmin = true;
+        var update = await userManager.UpdateAsync(user);
+        Assert.True(update.Succeeded);
+    }
+
+    internal static async Task<SpennyUser> SeedUserAsync(
+        AuthWebApplicationFactory factory,
+        string email,
+        string displayName,
+        AuthProviderKind provider,
+        DateTimeOffset registeredAtUtc,
+        bool emailConfirmed = true)
+    {
+        using var scope = factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<SpennyUser>>();
+        var user = new SpennyUser
+        {
+            UserName = provider == AuthProviderKind.Google ? $"google_{email}" : email,
+            Email = email,
+            DisplayName = displayName,
+            AuthProvider = provider,
+            EmailConfirmed = emailConfirmed,
+            RegisteredAtUtc = registeredAtUtc,
+        };
+
+        var create = provider == AuthProviderKind.Local
+            ? await userManager.CreateAsync(user, DefaultPassword)
+            : await userManager.CreateAsync(user);
+        Assert.True(create.Succeeded);
+        return user;
+    }
 }

@@ -9,6 +9,7 @@ using Spenny.Api.Auth.DependencyInjection;
 using Spenny.Api.Auth.Endpoints;
 using Spenny.Api.Configuration;
 using Spenny.Api.Data;
+using Spenny.Api.Admin;
 using Spenny.Api.Spending;
 
 EnvFileBootstrap.LoadForCurrentProcess();
@@ -117,6 +118,7 @@ if (app.Services.IsAuthConfigured())
         .WithName("DomainAccessCheck");
 
     api.MapSpendingEndpoints();
+    api.MapAdminEndpoints();
 }
 
 app.Run();

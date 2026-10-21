@@ -88,6 +88,7 @@ public static class GoogleAuthEndpoints
         UserManager<SpennyUser> userManager,
         SpennyDbContext db,
         IOptions<AuthAppSettings> authOptions,
+        TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
         if (http.RequestServices.GetService<GoogleAuthServicesRegistered>() is null)
@@ -159,6 +160,7 @@ public static class GoogleAuthEndpoints
             DisplayName = displayName.Trim(),
             AuthProvider = AuthProviderKind.Google,
             EmailConfirmed = true,
+            RegisteredAtUtc = timeProvider.GetUtcNow(),
         };
 
         var create = await userManager.CreateAsync(user);

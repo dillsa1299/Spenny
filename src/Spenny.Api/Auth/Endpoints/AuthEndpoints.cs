@@ -49,6 +49,7 @@ public static class AuthEndpoints
         UserManager<SpennyUser> userManager,
         ITransactionalEmailSender emailSender,
         IOptions<AuthAppSettings> authOptions,
+        TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
         var unavailable = DatabaseUnavailable(http);
@@ -78,6 +79,7 @@ public static class AuthEndpoints
             DisplayName = request.DisplayName.Trim(),
             AuthProvider = AuthProviderKind.Local,
             EmailConfirmed = false,
+            RegisteredAtUtc = timeProvider.GetUtcNow(),
         };
 
         var create = await userManager.CreateAsync(user, request.Password);

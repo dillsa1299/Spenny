@@ -43,4 +43,18 @@ export const googleSession: SessionState = {
   domainAccess: true,
 }
 
+export const adminUser: SessionUser = {
+  ...verifiedUser,
+  id: 'user-admin',
+  email: 'admin@example.com',
+  displayName: 'Admin User',
+  isAdmin: true,
+}
+
+export const adminSession: SessionState = {
+  authenticated: true,
+  user: adminUser,
+  domainAccess: true,
+}
+
 export const guestSession: SessionState = { authenticated: false }
