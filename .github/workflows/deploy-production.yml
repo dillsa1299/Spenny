@@ -20,7 +20,6 @@ jobs:
     permissions:
       contents: read
     env:
-      SPENNY_ENV_FILE: ${{ runner.temp }}/spenny.env
       COMPOSE_PROJECT_NAME: spenny-prod
     steps:
       - name: Checkout ref to deploy
@@ -32,12 +31,14 @@ jobs:
         env:
           SPENNY_DOTENV: ${{ secrets.SPENNY_DOTENV }}
         run: |
+          env_path="${RUNNER_TEMP}/spenny.env"
+          echo "SPENNY_ENV_FILE=${env_path}" >> "$GITHUB_ENV"
           if [ -z "$SPENNY_DOTENV" ]; then
             echo "Secret SPENNY_DOTENV is not set on the production environment."
             exit 1
           fi
-          printf '%s\n' "$SPENNY_DOTENV" > "$SPENNY_ENV_FILE"
-          chmod 600 "$SPENNY_ENV_FILE"
+          printf '%s\n' "$SPENNY_DOTENV" > "$env_path"
+          chmod 600 "$env_path"
 
       - name: Deploy stack
         run: |
