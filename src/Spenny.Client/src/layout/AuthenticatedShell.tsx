@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography'
 import { BarChart2, HandCoins, LayoutDashboard, LogOut, User, Wallet } from 'lucide-react'
 import { Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
-import { welcomeDisplayName } from '@/lib/welcomeDisplayName'
+import { authenticatedShellGreeting } from '@/lib/authenticatedShellGreeting'
 import { SelectedMonthProvider } from '@/month/SelectedMonthContext'
 import { ShellStickyHeader } from '@/layout/ShellStickyHeader'
 import { shellAppBarSx, shellNavChromeSx } from '@/theme/surfaces'
@@ -56,7 +56,7 @@ export function AuthenticatedShell() {
   const { user, signOut } = useAuth()
   const tabs = user?.isAdmin ? [...baseTabs, adminTab] : baseTabs
   const tabIndex = tabIndexForPath(location.pathname, tabs)
-  const greetingName = welcomeDisplayName(user)
+  const greetingLine = authenticatedShellGreeting(user)
 
   return (
     <SelectedMonthProvider>
@@ -91,7 +91,7 @@ export function AuthenticatedShell() {
                 whiteSpace: 'nowrap',
               }}
             >
-              Welcome back {greetingName}
+              {greetingLine}
             </Typography>
             <IconButton
               color="inherit"
