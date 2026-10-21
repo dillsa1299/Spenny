@@ -1,6 +1,7 @@
 // Spenny Web API entry point: per-IP rate limiting on /api, optional PostgreSQL (EF Core), dev-only CORS for the local SPA.
 // Anonymous health + rate-limited /api; domain routes require auth per ADR 0003.
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Spenny.Api;
@@ -25,6 +26,14 @@ builder.Services.AddOptions<RateLimitSettings>()
     .ValidateOnStart();
 
 builder.Services.AddRateLimiter(options => options.RejectionStatusCode = StatusCodes.Status429TooManyRequests);
+
+// Trust X-Forwarded-* from the SPA nginx container so OAuth redirect_uri uses https behind TLS termination.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 // Settings are read through IOptions so test hosts can override them after Program builds its configuration.
 builder.Services.AddOptions<RateLimiterOptions>()
@@ -68,6 +77,8 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.ApplyMigrationsIfConfigured();
+
+app.UseForwardedHeaders();
 
 if (app.Environment.IsDevelopment())
 {
