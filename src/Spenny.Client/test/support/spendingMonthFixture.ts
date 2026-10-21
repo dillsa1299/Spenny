@@ -59,3 +59,14 @@ export const emptySeriesFixture = {
   roundWeekendToFriday: false,
   description: null,
 }
+
+export const recurringWeeklySeriesFixture = {
+  id: '22222222-2222-2222-2222-222222222222',
+  name: 'Cleaner',
+  amount: 50,
+  anchorDate: '2026-10-05',
+  frequency: SpendingFrequency.Weekly,
+  category: SpendingCategory.Bills,
+  roundWeekendToFriday: false,
+  description: null,
+}

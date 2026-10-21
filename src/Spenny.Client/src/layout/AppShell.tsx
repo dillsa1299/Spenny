@@ -5,15 +5,15 @@ import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { Link as RouterLink, Outlet } from 'react-router-dom'
-import { DevelopmentEnvironmentBanner } from '@/components/DevelopmentEnvironmentBanner'
 import { PressableButton } from '@/components/PressableButton'
+import { ShellStickyHeader } from '@/layout/ShellStickyHeader'
 import { shellAppBarSx } from '@/theme/surfaces'
 
 export function AppShell() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <DevelopmentEnvironmentBanner />
-      <AppBar position="sticky" elevation={0} sx={shellAppBarSx}>
+      <ShellStickyHeader>
+      <AppBar position="static" elevation={0} sx={shellAppBarSx}>
         <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 64 } }}>
           <Typography
             component={RouterLink}
@@ -42,6 +42,7 @@ export function AppShell() {
           </PressableButton>
         </Toolbar>
       </AppBar>
+      </ShellStickyHeader>
       <Container
         component="main"
         maxWidth={false}

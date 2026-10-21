@@ -1,6 +1,11 @@
 // Spending series CRUD and month projection API.
 import { apiFetch, readApiError } from '@/api/apiClient'
-import type { SpendingMonthDto, SpendingSeriesDto, SpendingSeriesWrite } from '@/api/spendingTypes'
+import type {
+  SpendingExceptionWrite,
+  SpendingMonthDto,
+  SpendingSeriesDto,
+  SpendingSeriesWrite,
+} from '@/api/spendingTypes'
 
 async function ensureOk(response: Response): Promise<void> {
   if (!response.ok) {
@@ -43,5 +48,28 @@ export async function updateSpendingSeries(
 
 export async function deleteSpendingSeries(id: string): Promise<void> {
   const response = await apiFetch(`/api/spending/series/${id}`, { method: 'DELETE' })
+  await ensureOk(response)
+}
+
+export async function upsertSpendingException(
+  seriesId: string,
+  occurrenceDate: string,
+  body: SpendingExceptionWrite,
+): Promise<void> {
+  const response = await apiFetch(
+    `/api/spending/series/${seriesId}/exceptions/${occurrenceDate}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    },
+  )
+  await ensureOk(response)
+}
+
+export async function skipSpendingOccurrence(seriesId: string, occurrenceDate: string): Promise<void> {
+  const response = await apiFetch(
+    `/api/spending/series/${seriesId}/exceptions/${occurrenceDate}`,
+    { method: 'DELETE' },
+  )
   await ensureOk(response)
 }

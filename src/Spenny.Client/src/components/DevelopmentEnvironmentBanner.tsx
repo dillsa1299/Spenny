@@ -14,9 +14,6 @@ export function DevelopmentEnvironmentBanner() {
       role="status"
       aria-label="Development environment"
       sx={{
-        position: 'sticky',
-        top: 0,
-        zIndex: (theme) => theme.zIndex.appBar + 1,
         py: 0.5,
         px: 2,
         textAlign: 'center',

@@ -95,6 +95,179 @@ public class SpendingEndpointsTests
     }
 
     [Fact]
+    public async Task SkipException_RemovesOccurrenceFromMonth()
+    {
+        await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+
+        await AuthTestHelpers.SignInVerifiedAsync(factory, client, "skip-exc@example.com", "Skip");
+
+        var create = await client.PostAsJsonAsync("/api/spending/series", new
+        {
+            name = "Rent",
+            amount = 500m,
+            anchorDate = "2026-01-01",
+            frequency = SpendingFrequency.Monthly,
+            category = SpendingCategory.Bills,
+            roundWeekendToFriday = false,
+        });
+        var series = await create.Content.ReadFromJsonAsync<SeriesPayload>();
+        Assert.NotNull(series);
+
+        var skip = await client.PutAsJsonAsync(
+            $"/api/spending/series/{series!.Id}/exceptions/2026-10-01",
+            new { isSkipped = true });
+        Assert.Equal(HttpStatusCode.OK, skip.StatusCode);
+
+        var month = await client.GetFromJsonAsync<MonthPayload>("/api/spending/months/2026/10");
+        Assert.NotNull(month);
+        Assert.Empty(month!.Occurrences);
+        Assert.Equal(0m, month.MonthTotal);
+    }
+
+    [Fact]
+    public async Task EditException_ChangesMonthTotal()
+    {
+        await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+
+        await AuthTestHelpers.SignInVerifiedAsync(factory, client, "edit-exc@example.com", "Edit");
+
+        var create = await client.PostAsJsonAsync("/api/spending/series", new
+        {
+            name = "Rent",
+            amount = 500m,
+            anchorDate = "2026-01-01",
+            frequency = SpendingFrequency.Monthly,
+            category = SpendingCategory.Bills,
+            roundWeekendToFriday = false,
+        });
+        var series = await create.Content.ReadFromJsonAsync<SeriesPayload>();
+        Assert.NotNull(series);
+
+        var edit = await client.PutAsJsonAsync(
+            $"/api/spending/series/{series!.Id}/exceptions/2026-10-01",
+            new
+            {
+                isSkipped = false,
+                name = "Rent",
+                amount = 400m,
+                category = SpendingCategory.Bills,
+            });
+        Assert.Equal(HttpStatusCode.OK, edit.StatusCode);
+
+        var month = await client.GetFromJsonAsync<MonthPayload>("/api/spending/months/2026/10");
+        Assert.NotNull(month);
+        Assert.Single(month!.Occurrences);
+        Assert.Equal(400m, month.MonthTotal);
+        Assert.Equal(400m, month.Occurrences[0].Amount);
+    }
+
+    [Fact]
+    public async Task DeleteException_SkipsOccurrence()
+    {
+        await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+
+        await AuthTestHelpers.SignInVerifiedAsync(factory, client, "del-exc@example.com", "Del");
+
+        var create = await client.PostAsJsonAsync("/api/spending/series", new
+        {
+            name = "Rent",
+            amount = 500m,
+            anchorDate = "2026-01-01",
+            frequency = SpendingFrequency.Monthly,
+            category = SpendingCategory.Bills,
+            roundWeekendToFriday = false,
+        });
+        var series = await create.Content.ReadFromJsonAsync<SeriesPayload>();
+        Assert.NotNull(series);
+
+        var delete = await client.DeleteAsync(
+            $"/api/spending/series/{series!.Id}/exceptions/2026-10-01");
+        Assert.Equal(HttpStatusCode.NoContent, delete.StatusCode);
+
+        var month = await client.GetFromJsonAsync<MonthPayload>("/api/spending/months/2026/10");
+        Assert.NotNull(month);
+        Assert.Empty(month!.Occurrences);
+    }
+
+    [Fact]
+    public async Task SeriesUpdate_PreservesExistingException()
+    {
+        await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+
+        await AuthTestHelpers.SignInVerifiedAsync(factory, client, "preserve@example.com", "Preserve");
+
+        var create = await client.PostAsJsonAsync("/api/spending/series", new
+        {
+            name = "Rent",
+            amount = 500m,
+            anchorDate = "2026-01-01",
+            frequency = SpendingFrequency.Monthly,
+            category = SpendingCategory.Bills,
+            roundWeekendToFriday = false,
+        });
+        var series = await create.Content.ReadFromJsonAsync<SeriesPayload>();
+        Assert.NotNull(series);
+
+        await client.PutAsJsonAsync(
+            $"/api/spending/series/{series!.Id}/exceptions/2026-10-01",
+            new
+            {
+                isSkipped = false,
+                name = "Rent",
+                amount = 400m,
+                category = SpendingCategory.Bills,
+            });
+
+        var update = await client.PutAsJsonAsync($"/api/spending/series/{series.Id}", new
+        {
+            name = "Rent updated",
+            amount = 600m,
+            anchorDate = "2026-01-01",
+            frequency = SpendingFrequency.Monthly,
+            category = SpendingCategory.Bills,
+            roundWeekendToFriday = false,
+        });
+        Assert.Equal(HttpStatusCode.OK, update.StatusCode);
+
+        var month = await client.GetFromJsonAsync<MonthPayload>("/api/spending/months/2026/10");
+        Assert.NotNull(month);
+        Assert.Single(month!.Occurrences);
+        Assert.Equal(400m, month.Occurrences[0].Amount);
+    }
+
+    [Fact]
+    public async Task TenantIsolation_UserBCannotMutateUserAException()
+    {
+        await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
+        using var clientA = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+        using var clientB = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+
+        await AuthTestHelpers.SignInVerifiedAsync(factory, clientA, "exc-a@example.com", "A");
+        var create = await clientA.PostAsJsonAsync("/api/spending/series", new
+        {
+            name = "Bill",
+            amount = 50m,
+            anchorDate = "2026-10-05",
+            frequency = SpendingFrequency.Weekly,
+            category = SpendingCategory.Bills,
+            roundWeekendToFriday = false,
+        });
+        var series = await create.Content.ReadFromJsonAsync<SeriesPayload>();
+        Assert.NotNull(series);
+
+        await AuthTestHelpers.SignInVerifiedAsync(factory, clientB, "exc-b@example.com", "B");
+
+        var put = await clientB.PutAsJsonAsync(
+            $"/api/spending/series/{series!.Id}/exceptions/2026-10-05",
+            new { isSkipped = true });
+        Assert.Equal(HttpStatusCode.NotFound, put.StatusCode);
+    }
+
+    [Fact]
     public async Task TenantIsolation_UserBCannotMutateUserASeries()
     {
         await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
