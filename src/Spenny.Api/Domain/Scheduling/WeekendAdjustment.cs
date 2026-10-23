@@ -1,4 +1,4 @@
-// Maps weekend scheduled dates to the previous Friday when the series flag is enabled.
+// When enabled, walks backward to the previous weekday that is not a UK bank holiday.
 namespace Spenny.Api.Domain.Scheduling;
 
 public static class WeekendAdjustment
@@ -10,11 +10,18 @@ public static class WeekendAdjustment
             return scheduledDate;
         }
 
-        return scheduledDate.DayOfWeek switch
+        var date = scheduledDate;
+        while (!IsUkWorkingDay(date))
         {
-            DayOfWeek.Saturday => scheduledDate.AddDays(-1),
-            DayOfWeek.Sunday => scheduledDate.AddDays(-2),
-            _ => scheduledDate,
-        };
+            date = date.AddDays(-1);
+        }
+
+        return date;
+    }
+
+    private static bool IsUkWorkingDay(DateOnly date)
+    {
+        return date.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday)
+            && !UkBankHolidayCalendar.IsBankHoliday(date);
     }
 }

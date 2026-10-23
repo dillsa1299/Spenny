@@ -42,4 +42,34 @@ describe('OccurrenceList', () => {
     expect(screen.getByText('Monthly · General')).toBeInTheDocument()
     expect(screen.getByText('Bills')).toBeInTheDocument()
   })
+
+  it('shows description inline with name when set', () => {
+    const withDescription = {
+      ...october2026MonthFixture.occurrences[0],
+      description: 'Netflix family plan',
+    }
+    render(
+      <OccurrenceList
+        occurrences={[withDescription]}
+        series={[seriesA]}
+        emptyMessage="Empty"
+        onSelect={vi.fn()}
+      />,
+    )
+    expect(screen.getByText('- Netflix family plan')).toBeInTheDocument()
+    expect(screen.getByText('Monthly · General')).toBeInTheDocument()
+  })
+
+  it('omits description when empty', () => {
+    render(
+      <OccurrenceList
+        occurrences={[october2026MonthFixture.occurrences[0]]}
+        series={[seriesA]}
+        emptyMessage="Empty"
+        onSelect={vi.fn()}
+      />,
+    )
+    expect(screen.queryByText(/Netflix family plan/)).not.toBeInTheDocument()
+    expect(screen.getByText('Monthly · General')).toBeInTheDocument()
+  })
 })
