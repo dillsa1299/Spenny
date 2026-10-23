@@ -1,4 +1,5 @@
 // Full-month occurrence rows for the Spending screen, grouped by effective date like the dashboard Coming up list.
+import Box from '@mui/material/Box'
 import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
@@ -33,6 +34,64 @@ export function OccurrenceList({ occurrences, series, emptyMessage, onSelect }: 
     return frequency === undefined ? category : `${frequencyLabel(frequency)} · ${category}`
   }
 
+  const primaryText = (item: SpendingOccurrenceDto) => {
+    const description = item.description?.trim()
+    if (!description) {
+      return (
+        <Box
+          component="span"
+          sx={{
+            display: 'block',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {item.name}
+        </Box>
+      )
+    }
+    return (
+      <Box
+        component="span"
+        sx={{
+          display: 'flex',
+          alignItems: 'baseline',
+          minWidth: 0,
+        }}
+      >
+        <Box
+          component="span"
+          sx={{
+            flexShrink: 0,
+            maxWidth: '100%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {item.name}
+        </Box>
+        <Box
+          component="span"
+          sx={{
+            color: 'text.secondary',
+            fontWeight: 400,
+            fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+            ml: 0.75,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          - {description}
+        </Box>
+      </Box>
+    )
+  }
+
   return (
     <Stack spacing={1.5} sx={{ width: '100%' }}>
       {groupOccurrencesByDate(occurrences).map((group) => (
@@ -64,7 +123,7 @@ export function OccurrenceList({ occurrences, series, emptyMessage, onSelect }: 
                 }}
               >
                 <ListItemText
-                  primary={item.name}
+                  primary={primaryText(item)}
                   secondary={detailLabel(item)}
                   slotProps={{
                     primary: { sx: { fontWeight: 600, fontSize: { xs: '0.875rem', sm: '1rem' } } },

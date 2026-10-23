@@ -2,7 +2,7 @@
 import Checkbox from '@mui/material/Checkbox'
 import Drawer from '@mui/material/Drawer'
 import FormControl from '@mui/material/FormControl'
-import FormControlLabel from '@mui/material/FormControlLabel'
+import Box from '@mui/material/Box'
 import FormHelperText from '@mui/material/FormHelperText'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
@@ -51,9 +51,9 @@ function emptyForm(): FormState {
     name: '',
     amount: '',
     anchorDate: anchor,
-    frequency: SpendingFrequency.OneOff,
+    frequency: SpendingFrequency.Monthly,
     category: SpendingCategory.General,
-    roundWeekendToFriday: false,
+    roundWeekendToFriday: true,
     description: '',
   }
 }
@@ -209,15 +209,31 @@ export function SpendingSeriesSheet({
             ))}
           </Select>
         </FormControl>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={form.roundWeekendToFriday}
-              onChange={(e) => setForm((f) => ({ ...f, roundWeekendToFriday: e.target.checked }))}
-            />
-          }
-          label="Move weekend dates to previous Friday"
-        />
+        <Box
+          component="label"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+            cursor: 'pointer',
+            mx: 0,
+          }}
+        >
+          <Checkbox
+            checked={form.roundWeekendToFriday}
+            onChange={(e) => setForm((f) => ({ ...f, roundWeekendToFriday: e.target.checked }))}
+            sx={{ flexShrink: 0, p: 1 }}
+          />
+          <Stack spacing={0.25} sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="body1" color="text.primary">
+              Use previous UK working day
+            </Typography>
+            <FormHelperText component="div" sx={{ m: 0, color: 'text.secondary', lineHeight: 1.45 }}>
+              If the scheduled date falls on a weekend or UK bank holiday, show it on the previous weekday that is
+              not a bank holiday.
+            </FormHelperText>
+          </Stack>
+        </Box>
         <TextField
           label="Description (optional)"
           value={form.description}

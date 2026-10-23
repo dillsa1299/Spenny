@@ -1,4 +1,4 @@
-// Unit tests for Saturday/Sunday → previous Friday effective dating.
+// Unit tests for UK working-day effective dating (weekends and bank holidays).
 using Spenny.Api.Domain.Scheduling;
 
 namespace Spenny.Api.Tests.Domain.Scheduling;
@@ -26,5 +26,28 @@ public class WeekendAdjustmentTests
     {
         var monday = new DateOnly(2026, 3, 9);
         Assert.Equal(monday, WeekendAdjustment.Apply(monday, roundWeekendToFriday: true));
+    }
+
+    [Fact]
+    public void Apply_WhenRoundEnabled_MovesWeekdayBankHolidayToPreviousWorkingDay()
+    {
+        // Early May bank holiday (England & Wales), Monday 2026-05-04
+        var result = WeekendAdjustment.Apply(new DateOnly(2026, 5, 4), roundWeekendToFriday: true);
+        Assert.Equal(new DateOnly(2026, 5, 1), result);
+    }
+
+    [Fact]
+    public void Apply_WhenRoundEnabled_MovesGoodFridayToPreviousWorkingDay()
+    {
+        var result = WeekendAdjustment.Apply(new DateOnly(2026, 4, 3), roundWeekendToFriday: true);
+        Assert.Equal(new DateOnly(2026, 4, 2), result);
+    }
+
+    [Fact]
+    public void Apply_WhenRoundEnabled_SkipsWeekendAndMondayHolidayChain()
+    {
+        // Sunday before Early May Monday 2026-05-04
+        var result = WeekendAdjustment.Apply(new DateOnly(2026, 5, 3), roundWeekendToFriday: true);
+        Assert.Equal(new DateOnly(2026, 5, 1), result);
     }
 }

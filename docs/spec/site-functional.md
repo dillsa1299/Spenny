@@ -188,8 +188,8 @@ Non-admin users: **Admin** tab **hidden** (not shown disabled). Direct navigatio
 | Date | Yes | Scheduled date for occurrence or series anchor |
 | Frequency | Yes | One-off, weekly, monthly, yearly |
 | Category | Yes | From fixed list (§7.2) |
-| Round weekend to previous Friday | No | Default off; see §7.4 |
-| Description | No | Plain text, max **500** characters; detail/edit views only |
+| Use previous UK working day | No | Default off; see §7.4 |
+| Description | No | Plain text, max **500** characters; shown on Spending list when set |
 
 ### 7.2 Categories (fixed list)
 
@@ -204,11 +204,11 @@ User must choose **one** category per Spending:
 - For the **selected calendar month**, include only occurrences whose **adjusted** scheduled date falls in that month.
 - **Weekly / monthly / yearly** series generate occurrences accordingly; **one-off** appears once.
 
-### 7.4 Weekend adjustment
+### 7.4 UK working-day adjustment
 
-If **round weekend to previous Friday** is enabled and the raw date is **Saturday or Sunday**, the effective date is the **immediately preceding Friday**.
+If **use previous UK working day** is enabled (`roundWeekendToFriday` in the API), starting from the raw scheduled date the effective date walks **backward one calendar day at a time** until the date is a **weekday (Monday–Friday)** and **not a UK public holiday** (England & Wales / GB set via **Nager.Date** in the API).
 
-- **Bank holidays:** not adjusted in v1 (future enhancement).
+- When the flag is off, the raw scheduled date is the effective date (no adjustment).
 
 ### 7.5 Settlement model (no manual paid state)
 
