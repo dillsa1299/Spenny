@@ -1,6 +1,13 @@
-# Local dev: PostgreSQL only. API and Vite run on the host (Visual Studio or CLI).
+# Local dev: PostgreSQL (+ optional Mailpit). API and Vite run on the host (Visual Studio or CLI).
 # CI adds api + client via docker-compose.ci.yml.
 services:
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: spenny-mailpit
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+
   postgres:
     image: postgres:16
     container_name: spenny-postgres

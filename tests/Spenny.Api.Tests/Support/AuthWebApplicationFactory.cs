@@ -36,6 +36,8 @@ public class AuthWebApplicationFactory : WebApplicationFactory<Program>, IDispos
         builder.UseSetting("RateLimit:PermitLimit", "1000");
         builder.UseSetting("RateLimit:WindowSeconds", "60");
         builder.UseSetting($"ConnectionStrings:{DatabaseBootstrap.ConnectionStringName}", string.Empty);
+        // appsettings.Development.json defaults to Mailpit; tests use the logging sender unless overridden.
+        builder.UseSetting("Email:SmtpHost", string.Empty);
 
         builder.ConfigureServices((context, services) =>
         {

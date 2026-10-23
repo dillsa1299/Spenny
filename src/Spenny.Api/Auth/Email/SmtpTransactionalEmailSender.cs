@@ -1,6 +1,8 @@
 // Production-oriented SMTP sender when Email:SmtpHost is configured.
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
+using System.Text;
 using Microsoft.Extensions.Options;
 
 using Spenny.Api.Auth.Identity;
@@ -15,53 +17,47 @@ public sealed class SmtpTransactionalEmailSender(
 
     public async Task SendEmailConfirmationAsync(SpennyUser user, string confirmationLink, CancellationToken cancellationToken)
     {
-        var body = $"""
-            Hi {user.DisplayName},
-
-            Confirm your Spenny account by opening this link:
-
-            {confirmationLink}
-
-            If you did not create an account, you can ignore this message.
-            """;
-
-        await SendAsync(user.Email!, "Confirm your Spenny email", body, cancellationToken);
+        var (plain, html) = TransactionalEmailTemplates.EmailConfirmation(user.DisplayName, confirmationLink);
+        await SendAsync(user.Email!, "Confirm your Spenny email", plain, html, cancellationToken);
     }
 
     public async Task SendPasswordResetAsync(SpennyUser user, string resetLink, CancellationToken cancellationToken)
     {
-        var body = $"""
-            Hi {user.DisplayName},
-
-            Reset your Spenny password using this link:
-
-            {resetLink}
-
-            If you did not request a reset, you can ignore this message.
-            """;
-
-        await SendAsync(user.Email!, "Reset your Spenny password", body, cancellationToken);
+        var (plain, html) = TransactionalEmailTemplates.PasswordReset(user.DisplayName, resetLink);
+        await SendAsync(user.Email!, "Reset your Spenny password", plain, html, cancellationToken);
     }
 
-    private async Task SendAsync(string to, string subject, string body, CancellationToken cancellationToken)
+    private async Task SendAsync(
+        string to,
+        string subject,
+        string plainBody,
+        string htmlBody,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(_email.SmtpHost))
         {
             throw new InvalidOperationException("SMTP host is not configured.");
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         using var message = new MailMessage
         {
             From = new MailAddress(_email.FromAddress, _email.FromName),
             Subject = subject,
-            Body = body,
+            Body = plainBody,
             IsBodyHtml = false,
         };
         message.To.Add(to);
+        message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(
+            htmlBody,
+            Encoding.UTF8,
+            MediaTypeNames.Text.Html));
 
         using var client = new SmtpClient(_email.SmtpHost, _email.SmtpPort)
         {
-            EnableSsl = _email.SmtpPort != 25,
+            EnableSsl = _email.GetEffectiveUseSsl(),
+            Timeout = _email.SmtpTimeoutSeconds * 1000,
         };
 
         if (!string.IsNullOrWhiteSpace(_email.SmtpUser))
@@ -71,7 +67,8 @@ public sealed class SmtpTransactionalEmailSender(
 
         try
         {
-            await client.SendMailAsync(message, cancellationToken);
+            // System.Net.Mail does not honour CancellationToken during the send.
+            await client.SendMailAsync(message);
         }
         catch (Exception ex)
         {

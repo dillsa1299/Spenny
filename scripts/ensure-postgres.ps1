@@ -1,4 +1,4 @@
-# Starts Compose Postgres for local dev when missing; no-op if spenny-postgres is already running.
+# Ensures Compose Postgres + Mailpit for local dev; no-op when services are already healthy.
 # Invoked from Directory.Build.targets when debugging from Visual Studio (F5).
 $ErrorActionPreference = 'Stop'
 
@@ -18,13 +18,7 @@ if (-not (Test-Path $envFile)) {
     }
 }
 
-$running = docker inspect -f '{{.State.Running}}' spenny-postgres 2>$null
-if ($running -eq 'true') {
-    Write-Host 'ensure-postgres: spenny-postgres already running'
-    exit 0
-}
-
-Write-Host 'ensure-postgres: starting PostgreSQL via Docker Compose...'
+Write-Host 'ensure-postgres: ensuring Docker Compose services (postgres, mailpit)...'
 docker compose -f $composeFile --env-file $envFile up -d
 
 if ($LASTEXITCODE -ne 0) {
@@ -36,12 +30,14 @@ while ((Get-Date) -lt $deadline) {
     $health = docker inspect -f '{{.State.Health.Status}}' spenny-postgres 2>$null
     if ($health -eq 'healthy') {
         Write-Host 'ensure-postgres: PostgreSQL is healthy'
+        Write-Host 'ensure-postgres: Mailpit UI http://localhost:8025 (SMTP localhost:1025)'
         exit 0
     }
 
     $running = docker inspect -f '{{.State.Running}}' spenny-postgres 2>$null
     if ($running -eq 'true' -and [string]::IsNullOrEmpty($health)) {
         Write-Host 'ensure-postgres: container running (no health report yet)'
+        Write-Host 'ensure-postgres: Mailpit UI http://localhost:8025 (SMTP localhost:1025)'
         exit 0
     }
 

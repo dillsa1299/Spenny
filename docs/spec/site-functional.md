@@ -132,6 +132,7 @@ Existing client motion stack (e.g. Lenis smooth scroll, GSAP where appropriate) 
 - Local accounts must **verify email** before using the app (no Dashboard, no Spending CRUD).
 - **Unverified local login:** authentication **fails** with a clear, user-safe message (e.g. verify your email); user **stays on the sign-in screen** (no redirect into the app).
 - Resend verification email available from the verification / sign-in flow as appropriate.
+- If the server cannot deliver verification or password-reset email (SMTP failure), the API returns a clear, user-safe error and does **not** pretend the message was sent.
 
 ### 5.3 Google accounts
 
