@@ -47,7 +47,7 @@ Requires the **Node.js development** / JavaScript project workload so `Spenny.Cl
 dotnet run --project src/Spenny.Api
 ```
 
-HTTP: `http://localhost:5050` — `GET /api/health` for liveness. With Postgres configured, auth routes live under `/api/auth/*` (see `Auth` and `Email` in `appsettings.json`; verification links are logged to the API console when SMTP is unset). Requests are rate limited per IP (HTTP 429 when exceeded; see `RateLimit` in `appsettings.json`).
+HTTP: `http://localhost:5050` — `GET /api/health` for liveness. With Postgres configured, auth routes live under `/api/auth/*` (see `Auth` and `Email` in `appsettings.json`; verification links are logged to the API console when SMTP is unset). With **Mailpit** and `Email__SmtpHost` set (see below), open **http://localhost:8025** to read verification and reset mail instead of scraping logs. Requests are rate limited per IP (HTTP 429 when exceeded; see `RateLimit` in `appsettings.json`).
 
 ### Client
 
@@ -77,6 +77,27 @@ Authentication__Google__ClientSecret=your-client-secret
 Register an OAuth client in [Google Cloud Console](https://console.cloud.google.com/) with redirect URI `http://localhost:5173/api/auth/google/callback` (Vite dev proxy origin).
 
 The API builds `ConnectionStrings__Default` from `POSTGRES_*` when that connection string is not set explicitly. On startup the API applies pending EF Core migrations when the connection string is configured. See [compose/README.md](compose/README.md). CI builds the **full stack** (API + client + Postgres) via `docker-compose.ci.yml`; see [.github/workflows/ci.yml](.github/workflows/ci.yml).
+
+### Transactional email (local)
+
+[Mailpit](https://github.com/axllent/mailpit) ships in the dev Compose file. Start it with Postgres (or alone):
+
+```bash
+docker compose -f compose/docker-compose.yml --env-file .env up -d
+```
+
+In `.env`, point the API at Mailpit (see commented block in `.env.example`):
+
+```env
+Email__SmtpHost=localhost
+Email__SmtpPort=1025
+Email__UseSsl=false
+Email__FromAddress=noreply@localhost
+```
+
+Open **http://localhost:8025** after register, resend verification, or forgot-password.
+
+**Defaults:** In **Development**, the API uses Mailpit via [`appsettings.Development.json`](src/Spenny.Api/appsettings.Development.json) and [`.env.example`](.env.example) (`localhost:1025`). To log links only (no Mailpit), remove or comment out `Email__SmtpHost` in `.env` and clear `Email:SmtpHost` in `appsettings.Development.json`.
 
 ### Tests and build
 

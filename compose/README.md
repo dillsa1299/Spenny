@@ -7,7 +7,7 @@ Hybrid layout: **PostgreSQL in Compose** for local dev; **API + client + Postgre
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows: WSL2 backend recommended)
 - Repo-root [`.env`](../.env.example) (default **`POSTGRES_PORT=5433`** so it does not fight a local PostgreSQL on 5432)
 
-## Local dev (database only)
+## Local dev (database + Mailpit)
 
 From the **repository root**:
 
@@ -15,6 +15,8 @@ From the **repository root**:
 cp .env.example .env   # Windows: copy .env.example .env
 docker compose -f compose/docker-compose.yml --env-file .env up -d
 ```
+
+**Mailpit** (SMTP catcher) listens on **1025** (SMTP) and **8025** (web UI). Point the API at `Email__SmtpHost=localhost` and `Email__SmtpPort=1025` (see [root README](../README.md)).
 
 Stop:
 

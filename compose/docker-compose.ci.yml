@@ -10,6 +10,10 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__Default: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      Email__SmtpHost: mailpit
+      Email__SmtpPort: 1025
+      Email__UseSsl: false
+      Email__FromAddress: noreply@localhost
     depends_on:
       postgres:
         condition: service_healthy

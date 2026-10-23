@@ -1,6 +1,7 @@
 // Registers Identity, cookies, email, optional Google OAuth, and domain authorization when a database is available.
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Spenny.Api.Auth.Access;
 using Spenny.Api.Auth.Email;
 using Spenny.Api.Auth.Google;
@@ -25,6 +26,7 @@ public static class AuthServiceExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddSingleton<IValidateOptions<EmailSettings>, EmailSettingsValidator>();
         services.AddOptions<EmailSettings>()
             .BindConfiguration(EmailSettings.SectionName)
             .ValidateDataAnnotations()

@@ -40,6 +40,15 @@ Template: [`.env.deploy.example`](../../.env.deploy.example). Build **two** vari
 | `ASPNETCORE_ENVIRONMENT` | `Development` | `Production` |
 | `Auth__SpaBaseUrl` | `https://dev.example.com` | `https://app.example.com` |
 | `POSTGRES_PASSWORD` | unique | unique |
+| `Email__SmtpHost` | optional (omit → verification links in API logs) | **required** (ESP SMTP relay) |
+| `Email__SmtpPort` | `1025` if using local Mailpit; else `587` | `587` (or provider default) |
+| `Email__UseSsl` | `false` for Mailpit; `true` for typical ESP | `true` |
+| `Email__SmtpUser` | ESP API user / SMTP login | same |
+| `Email__SmtpPassword` | ESP SMTP password or API key | same |
+| `Email__FromAddress` | `noreply@localhost` (Mailpit) or verified sender | verified sender at your domain |
+| `Email__FromName` | `Spenny` | `Spenny` |
+
+**Transactional email:** Local accounts need verification and password-reset mail. In **Production**, the API refuses to start if `Email__SmtpHost` is missing while PostgreSQL auth is enabled. Use any SMTP-capable provider (Brevo, Mailjet, SendGrid, etc.); configure SPF/DKIM at the provider. Do not commit credentials — keep them only in `SPENNY_DOTENV`.
 
 Google OAuth redirect URI per environment: `{Auth__SpaBaseUrl}/api/auth/google/callback`.
 

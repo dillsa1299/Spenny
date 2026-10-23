@@ -14,6 +14,12 @@ namespace Spenny.Api.Auth.Endpoints;
 
 public static class AuthEndpoints
 {
+    private const string EmailDeliveryFailedMessage =
+        "We couldn't send email right now. Please try again in a few minutes.";
+
+    private const string RegisterEmailDeliveryFailedMessage =
+        "Your account was created, but we couldn't send the verification email. Use resend verification or try again shortly.";
+
     public static IEndpointRouteBuilder MapSpennyAuthEndpoints(this IEndpointRouteBuilder api)
     {
         var auth = api.MapGroup("/auth");
@@ -50,6 +56,7 @@ public static class AuthEndpoints
         ITransactionalEmailSender emailSender,
         IOptions<AuthAppSettings> authOptions,
         TimeProvider timeProvider,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         var unavailable = DatabaseUnavailable(http);
@@ -57,6 +64,8 @@ public static class AuthEndpoints
         {
             return unavailable;
         }
+
+        var log = loggerFactory.CreateLogger("Spenny.Auth.Register");
 
         if (!TryValidate(request, out var validationError))
         {
@@ -99,7 +108,17 @@ public static class AuthEndpoints
                 ["token"] = token,
             });
 
-        await emailSender.SendEmailConfirmationAsync(user, link, cancellationToken);
+        try
+        {
+            await emailSender.SendEmailConfirmationAsync(user, link, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            log.LogError(ex, "Failed to send verification email for {Email}", user.Email);
+            return Results.Json(
+                new { message = RegisterEmailDeliveryFailedMessage },
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
 
         return Results.Ok(new
         {
@@ -205,6 +224,7 @@ public static class AuthEndpoints
         UserManager<SpennyUser> userManager,
         ITransactionalEmailSender emailSender,
         IOptions<AuthAppSettings> authOptions,
+        ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         var unavailable = DatabaseUnavailable(http);
@@ -212,6 +232,8 @@ public static class AuthEndpoints
         {
             return unavailable;
         }
+
+        var log = loggerFactory.CreateLogger("Spenny.Auth.ResendVerification");
 
         if (string.IsNullOrWhiteSpace(request.Email))
         {
@@ -230,7 +252,17 @@ public static class AuthEndpoints
                     ["userId"] = user.Id,
                     ["token"] = token,
                 });
-            await emailSender.SendEmailConfirmationAsync(user, link, cancellationToken);
+            try
+            {
+                await emailSender.SendEmailConfirmationAsync(user, link, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Failed to resend verification email for {Email}", user.Email);
+                return Results.Json(
+                    new { message = EmailDeliveryFailedMessage },
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
         }
 
         return Results.Ok(new
@@ -312,7 +344,18 @@ public static class AuthEndpoints
                     ["userId"] = user.Id,
                     ["token"] = token,
                 });
-            await emailSender.SendPasswordResetAsync(user, link, cancellationToken);
+            try
+            {
+                await emailSender.SendPasswordResetAsync(user, link, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Failed to send password reset email for {Email}", email);
+                return Results.Json(
+                    new { message = EmailDeliveryFailedMessage },
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+
             if (environment.IsDevelopment() && string.IsNullOrWhiteSpace(emailOptions.Value.SmtpHost))
             {
                 devResetLink = link;
