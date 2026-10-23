@@ -13,7 +13,7 @@ From the **repository root**:
 
 ```bash
 cp .env.example .env   # Windows: copy .env.example .env
-docker compose -f compose/docker-compose.yml --env-file .env up -d
+docker compose -f compose/docker-compose.yml -f compose/docker-compose.local.yml --env-file .env up -d
 ```
 
 **Mailpit** (SMTP catcher) listens on **1025** (SMTP) and **8025** (web UI). Point the API at `Email__SmtpHost=localhost` and `Email__SmtpPort=1025` (see [root README](../README.md)).
@@ -21,7 +21,7 @@ docker compose -f compose/docker-compose.yml --env-file .env up -d
 Stop:
 
 ```bash
-docker compose -f compose/docker-compose.yml --env-file .env down
+docker compose -f compose/docker-compose.yml -f compose/docker-compose.local.yml --env-file .env down
 ```
 
 Run the API and client on the host as described in the [root README](../README.md). The API reads `POSTGRES_*` from `.env` and builds `ConnectionStrings__Default` for `localhost` and `POSTGRES_PORT`.
@@ -48,7 +48,7 @@ You can run the CI merge locally to reproduce the pipeline; it is **not** the de
 
 ## Self-hosted deploy (homeserver)
 
-Production-style deploy uses [`docker-compose.deploy.yml`](docker-compose.deploy.yml): nginx serves the SPA and proxies `/api` to the API container; Postgres is not published to the host. Config template: [`.env.deploy.example`](../.env.deploy.example). Actions deploys use GitHub Environment secret **`SPENNY_DOTENV`** (see [docs/deploy/self-hosted.md](../docs/deploy/self-hosted.md)).
+Production-style deploy uses [`docker-compose.deploy.yml`](docker-compose.deploy.yml): nginx serves the SPA and proxies `/api` to the API container; Postgres is not published to the host. **Mailpit is not started** on deploy (local overlay only; CI has its own Mailpit service). Config template: [`.env.deploy.example`](../.env.deploy.example). Actions deploys use GitHub Environment secret **`SPENNY_DOTENV`** (see [docs/deploy/self-hosted.md](../docs/deploy/self-hosted.md)).
 
 ```bash
 export SPENNY_ENV_FILE=/path/to/your.env

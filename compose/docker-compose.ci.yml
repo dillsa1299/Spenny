@@ -1,6 +1,9 @@
 # CI overlay: build and run API + static client with the base postgres service.
 # docker compose -f compose/docker-compose.yml -f compose/docker-compose.ci.yml up -d --build
 services:
+  mailpit:
+    image: axllent/mailpit:latest
+
   api:
     build:
       context: ../src/Spenny.Api

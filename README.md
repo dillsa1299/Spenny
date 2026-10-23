@@ -64,7 +64,7 @@ Open `http://localhost:5173` (landing). With an empty `VITE_API_BASE_URL` in `.e
 Start Postgres in Docker (API and Vite still run on the host):
 
 ```bash
-docker compose -f compose/docker-compose.yml --env-file .env up -d
+docker compose -f compose/docker-compose.yml -f compose/docker-compose.local.yml --env-file .env up -d
 ```
 
 **Google sign-in** (optional): set in `.env`:
@@ -83,7 +83,7 @@ The API builds `ConnectionStrings__Default` from `POSTGRES_*` when that connecti
 [Mailpit](https://github.com/axllent/mailpit) ships in the dev Compose file. Start it with Postgres (or alone):
 
 ```bash
-docker compose -f compose/docker-compose.yml --env-file .env up -d
+docker compose -f compose/docker-compose.yml -f compose/docker-compose.local.yml --env-file .env up -d
 ```
 
 In `.env`, point the API at Mailpit (see commented block in `.env.example`):
