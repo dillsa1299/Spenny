@@ -3,7 +3,8 @@
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
-$composeFile = Join-Path $repoRoot 'compose\docker-compose.yml'
+$composeBase = Join-Path $repoRoot 'compose\docker-compose.yml'
+$composeLocal = Join-Path $repoRoot 'compose\docker-compose.local.yml'
 $envFile = Join-Path $repoRoot '.env'
 
 if (-not (Test-Path $envFile)) {
@@ -19,7 +20,7 @@ if (-not (Test-Path $envFile)) {
 }
 
 Write-Host 'ensure-postgres: ensuring Docker Compose services (postgres, mailpit)...'
-docker compose -f $composeFile --env-file $envFile up -d
+docker compose -f $composeBase -f $composeLocal --env-file $envFile up -d
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error 'ensure-postgres: docker compose failed'

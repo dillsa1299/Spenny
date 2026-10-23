@@ -1,4 +1,5 @@
 # Self-hosted deploy overlay: API + client (nginx proxies /api) + Postgres on the Docker network only.
+# Base compose has no Mailpit; use SMTP settings in SPENNY_DOTENV (see docs/deploy/self-hosted.md).
 # docker compose -f compose/docker-compose.yml -f compose/docker-compose.deploy.yml --env-file /path/.env -p spenny-dev up -d --build
 services:
   postgres:

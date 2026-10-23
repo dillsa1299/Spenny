@@ -1,0 +1,9 @@
+# Local dev overlay: Mailpit SMTP catcher. Merge with docker-compose.yml only on the host workstation.
+# Not used for self-hosted deploy (use real SMTP in SPENNY_DOTENV) or CI (mailpit is in docker-compose.ci.yml).
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: spenny-mailpit
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
