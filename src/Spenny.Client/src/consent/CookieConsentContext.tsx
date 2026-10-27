@@ -13,7 +13,6 @@ import {
 } from 'react'
 import { CookieConsentBanner } from '@/consent/CookieConsentBanner'
 import {
-  clearCookieConsent,
   readCookieConsent,
   writeCookieConsent,
   type CookieConsentDecision,
@@ -52,8 +51,7 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
   }, [persist])
 
   const openSettings = useCallback(() => {
-    clearCookieConsent()
-    setConsent(null)
+    // Re-show the banner; keep the previous decision until Accept/Reject is chosen again.
     setBannerForcedOpen(true)
   }, [])
 

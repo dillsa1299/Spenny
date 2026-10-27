@@ -84,7 +84,7 @@ describe('CookieConsentProvider', () => {
     expect(canLoadNonEssential()).toBe(false)
   })
 
-  it('Cookie settings clears the choice and restores the banner', async () => {
+  it('Cookie settings restores the banner while keeping the prior decision until changed', async () => {
     const user = userEvent.setup()
     renderConsentApp()
 
@@ -92,7 +92,12 @@ describe('CookieConsentProvider', () => {
     await user.click(screen.getByRole('button', { name: 'Cookie settings' }))
 
     expect(screen.getByRole('dialog', { name: 'Cookies' })).toBeInTheDocument()
-    expect(localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY)).toBeNull()
+    expect(JSON.parse(localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY)!).decision).toBe(
+      'accepted',
+    )
+    expect(canLoadNonEssential()).toBe(true)
+
+    await user.click(screen.getByRole('button', { name: 'Reject non-essential' }))
     expect(canLoadNonEssential()).toBe(false)
   })
 })

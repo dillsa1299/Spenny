@@ -92,7 +92,7 @@ export function CookieConsentBanner({ onAccept, onReject }: CookieConsentBannerP
             </PressableButton>
             <PressableButton
               variant="outlined"
-              color="primary"
+              color="inherit"
               onClick={onAccept}
               sx={{ flex: 1, fontWeight: 600, py: 1.25 }}
             >
