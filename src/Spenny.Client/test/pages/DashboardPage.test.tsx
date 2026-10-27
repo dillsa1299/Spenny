@@ -38,6 +38,7 @@ describe('DashboardPage', () => {
       expect(screen.getByText('/ £175.00')).toBeInTheDocument()
     })
     expect(screen.getByRole('heading', { name: 'Coming up' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Amount required by' })).toBeInTheDocument()
     const comingUpRow = screen.getByRole('listitem')
     expect(comingUpRow.closest('ul')?.previousElementSibling).toHaveTextContent('20th October')
     expect(comingUpRow).toHaveTextContent('C · Transport')

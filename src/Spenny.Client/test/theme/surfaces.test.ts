@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  bottomSheetBackdropSx,
+  bottomSheetPaperSx,
   glassPanelInsetSx,
   glassPanelSx,
   pillChipSx,
@@ -9,7 +11,14 @@ import {
 
 describe('surface tokens', () => {
   it('exports shell and glass sx objects with reduced-transparency fallbacks', () => {
-    for (const token of [shellAppBarSx, shellNavChromeSx, glassPanelSx, glassPanelInsetSx]) {
+    for (const token of [
+      shellAppBarSx,
+      shellNavChromeSx,
+      glassPanelSx,
+      glassPanelInsetSx,
+      bottomSheetBackdropSx,
+      bottomSheetPaperSx,
+    ]) {
       expect(token).toMatchObject({
         '@media (prefers-reduced-transparency: reduce)': expect.objectContaining({
           backdropFilter: 'none',

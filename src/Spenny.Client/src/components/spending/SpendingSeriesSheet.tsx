@@ -1,8 +1,8 @@
 // Bottom sheet to create or edit a Spending series template.
+import Box from '@mui/material/Box'
 import Checkbox from '@mui/material/Checkbox'
 import Drawer from '@mui/material/Drawer'
 import FormControl from '@mui/material/FormControl'
-import Box from '@mui/material/Box'
 import FormHelperText from '@mui/material/FormHelperText'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
@@ -10,7 +10,9 @@ import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { Pencil, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { BottomSheetHandle, BottomSheetHeader } from '@/components/BottomSheetChrome'
 import { PressableButton } from '@/components/PressableButton'
 import { sanitizeAmountInput } from '@/lib/sanitizeAmountInput'
 import type { SpendingSeriesDto, SpendingSeriesWrite } from '@/api/spendingTypes'
@@ -20,6 +22,7 @@ import {
   SpendingCategory,
   SpendingFrequency,
 } from '@/api/spendingTypes'
+import { bottomSheetBackdropSx, bottomSheetPaperSx, glassPanelSx } from '@/theme/surfaces'
 
 export type SeriesSheetMode = 'create' | 'edit'
 
@@ -44,6 +47,15 @@ type FormState = {
 }
 
 type FormErrors = Partial<Record<keyof FormState, string>>
+
+const primaryButtonSx = {
+  py: 1.25,
+  borderRadius: 3,
+  fontWeight: 700,
+  textTransform: 'none' as const,
+  bgcolor: '#52b788',
+  '&:hover': { bgcolor: '#40916c' },
+}
 
 function emptyForm(): FormState {
   const today = new Date()
@@ -124,27 +136,37 @@ export function SpendingSeriesSheet({
     })
   }
 
+  const isCreate = mode === 'create'
+
   return (
     <Drawer
       anchor="bottom"
       open={open}
       onClose={onClose}
       slotProps={{
-        paper: {
-          sx: {
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-            px: 2,
-            pt: 2,
-            pb: 3,
-            maxHeight: '90vh',
-          },
-        },
+        backdrop: { sx: bottomSheetBackdropSx },
+        paper: { sx: { ...bottomSheetPaperSx, overflow: 'auto' } },
       }}
     >
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-        {mode === 'create' ? 'Add spending' : 'Edit spending'}
-      </Typography>
+      <BottomSheetHandle />
+      <BottomSheetHeader
+        icon={
+          isCreate ? (
+            <Plus size={22} strokeWidth={2.25} aria-hidden />
+          ) : (
+            <Pencil size={22} strokeWidth={2.25} aria-hidden />
+          )
+        }
+        title={isCreate ? 'Add spending' : 'Edit spending'}
+        subtitle={
+          isCreate
+            ? 'Bill, subscription, or one-off cost'
+            : initial?.name
+              ? `Updating ${initial.name}`
+              : 'Update this series'
+        }
+      />
+
       <Stack
         spacing={2}
         component="form"
@@ -153,33 +175,36 @@ export function SpendingSeriesSheet({
           void submit()
         }}
       >
-        <TextField
-          label="Name"
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          error={Boolean(errors.name)}
-          helperText={errors.name}
-          fullWidth
-        />
-        <TextField
-          label="Amount (£)"
-          inputMode="decimal"
-          value={form.amount}
-          onChange={(e) => setForm((f) => ({ ...f, amount: sanitizeAmountInput(e.target.value) }))}
-          error={Boolean(errors.amount)}
-          helperText={errors.amount}
-          fullWidth
-        />
-        <TextField
-          label="Date"
-          type="date"
-          value={form.anchorDate}
-          onChange={(e) => setForm((f) => ({ ...f, anchorDate: e.target.value }))}
-          error={Boolean(errors.anchorDate)}
-          helperText={errors.anchorDate}
-          fullWidth
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
+        <Box sx={{ ...glassPanelSx, borderRadius: 3, p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label="Name"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            error={Boolean(errors.name)}
+            helperText={errors.name}
+            fullWidth
+          />
+          <TextField
+            label="Amount (£)"
+            inputMode="decimal"
+            value={form.amount}
+            onChange={(e) => setForm((f) => ({ ...f, amount: sanitizeAmountInput(e.target.value) }))}
+            error={Boolean(errors.amount)}
+            helperText={errors.amount}
+            fullWidth
+          />
+          <TextField
+            label="Date"
+            type="date"
+            value={form.anchorDate}
+            onChange={(e) => setForm((f) => ({ ...f, anchorDate: e.target.value }))}
+            error={Boolean(errors.anchorDate)}
+            helperText={errors.anchorDate}
+            fullWidth
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </Box>
+
         <FormControl fullWidth>
           <InputLabel id="frequency-label">Frequency</InputLabel>
           <Select
@@ -210,13 +235,18 @@ export function SpendingSeriesSheet({
             ))}
           </Select>
         </FormControl>
+
         <Box
           component="label"
           sx={{
+            ...glassPanelSx,
+            borderRadius: 3,
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             gap: 0.5,
             cursor: 'pointer',
+            px: 1.5,
+            py: 1.25,
             mx: 0,
           }}
         >
@@ -225,8 +255,8 @@ export function SpendingSeriesSheet({
             onChange={(e) => setForm((f) => ({ ...f, roundWeekendToFriday: e.target.checked }))}
             sx={{ flexShrink: 0, p: 1 }}
           />
-          <Stack spacing={0.25} sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="body1" color="text.primary">
+          <Stack spacing={0.25} sx={{ flex: 1, minWidth: 0, pt: 0.75 }}>
+            <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600 }}>
               Use previous UK working day
             </Typography>
             <FormHelperText component="div" sx={{ m: 0, color: 'text.secondary', lineHeight: 1.45 }}>
@@ -235,6 +265,7 @@ export function SpendingSeriesSheet({
             </FormHelperText>
           </Stack>
         </Box>
+
         <TextField
           label="Description (optional)"
           value={form.description}
@@ -243,11 +274,31 @@ export function SpendingSeriesSheet({
           minRows={2}
           fullWidth
         />
-        <Stack direction="row" spacing={1.5} sx={{ pt: 1 }}>
-          <PressableButton variant="contained" fullWidth disabled={saving} onClick={() => void submit()}>
+
+        <Stack direction="row" spacing={1.5} sx={{ pt: 0.5 }}>
+          <PressableButton
+            variant="contained"
+            fullWidth
+            disabled={saving}
+            onClick={() => void submit()}
+            sx={primaryButtonSx}
+          >
             Save
           </PressableButton>
-          <PressableButton variant="outlined" fullWidth disabled={saving} onClick={onClose}>
+          <PressableButton
+            variant="outlined"
+            fullWidth
+            disabled={saving}
+            onClick={onClose}
+            sx={{
+              py: 1.25,
+              borderRadius: 3,
+              fontWeight: 700,
+              textTransform: 'none',
+              borderColor: 'rgba(255,255,255,0.16)',
+              color: 'text.primary',
+            }}
+          >
             Cancel
           </PressableButton>
         </Stack>
@@ -256,9 +307,7 @@ export function SpendingSeriesSheet({
             Delete series
           </PressableButton>
         )}
-        {saving && (
-          <FormHelperText sx={{ textAlign: 'center' }}>Saving…</FormHelperText>
-        )}
+        {saving && <FormHelperText sx={{ textAlign: 'center' }}>Saving…</FormHelperText>}
       </Stack>
     </Drawer>
   )

@@ -1,6 +1,7 @@
 // Spending series CRUD and month projection API.
 import { apiFetch, readApiError } from '@/api/apiClient'
 import type {
+  AmountRequiredByDto,
   SpendingExceptionWrite,
   SpendingMonthDto,
   SpendingSeriesDto,
@@ -17,6 +18,13 @@ export async function fetchSpendingMonth(year: number, month: number): Promise<S
   const response = await apiFetch(`/api/spending/months/${year}/${month}`)
   await ensureOk(response)
   return (await response.json()) as SpendingMonthDto
+}
+
+export async function fetchAmountRequiredBy(targetDate: string): Promise<AmountRequiredByDto> {
+  const params = new URLSearchParams({ targetDate })
+  const response = await apiFetch(`/api/spending/amount-required-by?${params}`)
+  await ensureOk(response)
+  return (await response.json()) as AmountRequiredByDto
 }
 
 export async function listSpendingSeries(): Promise<SpendingSeriesDto[]> {
