@@ -64,6 +64,12 @@ export type SpendingMonthDto = {
   upcomingOccurrenceIds: OccurrenceId[]
 }
 
+export type AmountRequiredByDto = {
+  asOfDate: string
+  targetDate: string
+  total: number
+}
+
 export type SpendingSeriesDto = {
   id: string
   name: string

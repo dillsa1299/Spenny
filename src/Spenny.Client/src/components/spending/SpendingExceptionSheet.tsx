@@ -1,4 +1,5 @@
 // Bottom sheet to edit or remove a single occurrence via an exception record.
+import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import FormControl from '@mui/material/FormControl'
 import FormHelperText from '@mui/material/FormHelperText'
@@ -8,14 +9,18 @@ import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { CalendarClock } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { BottomSheetHandle, BottomSheetHeader } from '@/components/BottomSheetChrome'
 import { PressableButton } from '@/components/PressableButton'
+import { formatCalendarDay } from '@/lib/formatCalendarDay'
 import { sanitizeAmountInput } from '@/lib/sanitizeAmountInput'
 import type { SpendingOccurrenceDto } from '@/api/spendingTypes'
 import {
   SPENDING_CATEGORY_OPTIONS,
   type SpendingCategoryValue,
 } from '@/api/spendingTypes'
+import { bottomSheetBackdropSx, bottomSheetPaperSx, glassPanelSx } from '@/theme/surfaces'
 
 type SpendingExceptionSheetProps = {
   open: boolean
@@ -39,6 +44,15 @@ type FormState = {
 }
 
 type FormErrors = Partial<Record<keyof FormState, string>>
+
+const primaryButtonSx = {
+  py: 1.25,
+  borderRadius: 3,
+  fontWeight: 700,
+  textTransform: 'none' as const,
+  bgcolor: '#52b788',
+  '&:hover': { bgcolor: '#40916c' },
+}
 
 function fromOccurrence(occurrence: SpendingOccurrenceDto): FormState {
   return {
@@ -98,11 +112,11 @@ export function SpendingExceptionSheet({
     })
   }
 
-  const dateLabel = occurrence
+  const subtitle = occurrence
     ? occurrence.effectiveDate !== occurrence.occurrenceDate
-      ? `${occurrence.effectiveDate} (scheduled ${occurrence.occurrenceDate})`
-      : occurrence.effectiveDate
-    : ''
+      ? `${formatCalendarDay(occurrence.effectiveDate)} · scheduled ${formatCalendarDay(occurrence.occurrenceDate)}`
+      : formatCalendarDay(occurrence.effectiveDate)
+    : 'Changes apply to this date only'
 
   return (
     <Drawer
@@ -110,21 +124,17 @@ export function SpendingExceptionSheet({
       open={open}
       onClose={onClose}
       slotProps={{
-        paper: {
-          sx: {
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-            px: 2,
-            pt: 2,
-            pb: 3,
-            maxHeight: '90vh',
-          },
-        },
+        backdrop: { sx: bottomSheetBackdropSx },
+        paper: { sx: { ...bottomSheetPaperSx, overflow: 'auto' } },
       }}
     >
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-        Edit this date
-      </Typography>
+      <BottomSheetHandle />
+      <BottomSheetHeader
+        icon={<CalendarClock size={22} strokeWidth={2.25} aria-hidden />}
+        title="Edit this date"
+        subtitle={subtitle}
+      />
+
       <Stack
         spacing={2}
         component="form"
@@ -133,30 +143,32 @@ export function SpendingExceptionSheet({
           void submit()
         }}
       >
-        <TextField
-          label="Date"
-          value={dateLabel}
-          fullWidth
-          disabled
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
-        <TextField
-          label="Name"
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          error={Boolean(errors.name)}
-          helperText={errors.name}
-          fullWidth
-        />
-        <TextField
-          label="Amount (£)"
-          inputMode="decimal"
-          value={form.amount}
-          onChange={(e) => setForm((f) => ({ ...f, amount: sanitizeAmountInput(e.target.value) }))}
-          error={Boolean(errors.amount)}
-          helperText={errors.amount}
-          fullWidth
-        />
+        <Box sx={{ ...glassPanelSx, borderRadius: 3, p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+            {occurrence ? formatCalendarDay(occurrence.effectiveDate) : '—'}
+            {occurrence && occurrence.effectiveDate !== occurrence.occurrenceDate
+              ? ` (scheduled ${formatCalendarDay(occurrence.occurrenceDate)})`
+              : ''}
+          </Typography>
+          <TextField
+            label="Name"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            error={Boolean(errors.name)}
+            helperText={errors.name}
+            fullWidth
+          />
+          <TextField
+            label="Amount (£)"
+            inputMode="decimal"
+            value={form.amount}
+            onChange={(e) => setForm((f) => ({ ...f, amount: sanitizeAmountInput(e.target.value) }))}
+            error={Boolean(errors.amount)}
+            helperText={errors.amount}
+            fullWidth
+          />
+        </Box>
+
         <FormControl fullWidth>
           <InputLabel id="exc-category-label">Category</InputLabel>
           <Select
@@ -180,11 +192,31 @@ export function SpendingExceptionSheet({
           minRows={2}
           fullWidth
         />
-        <Stack direction="row" spacing={1.5} sx={{ pt: 1 }}>
-          <PressableButton variant="contained" fullWidth disabled={saving} onClick={() => void submit()}>
+
+        <Stack direction="row" spacing={1.5} sx={{ pt: 0.5 }}>
+          <PressableButton
+            variant="contained"
+            fullWidth
+            disabled={saving}
+            onClick={() => void submit()}
+            sx={primaryButtonSx}
+          >
             Save
           </PressableButton>
-          <PressableButton variant="outlined" fullWidth disabled={saving} onClick={onClose}>
+          <PressableButton
+            variant="outlined"
+            fullWidth
+            disabled={saving}
+            onClick={onClose}
+            sx={{
+              py: 1.25,
+              borderRadius: 3,
+              fontWeight: 700,
+              textTransform: 'none',
+              borderColor: 'rgba(255,255,255,0.16)',
+              color: 'text.primary',
+            }}
+          >
             Cancel
           </PressableButton>
         </Stack>
@@ -193,9 +225,7 @@ export function SpendingExceptionSheet({
             Remove this date
           </PressableButton>
         )}
-        {saving && (
-          <FormHelperText sx={{ textAlign: 'center' }}>Saving…</FormHelperText>
-        )}
+        {saving && <FormHelperText sx={{ textAlign: 'center' }}>Saving…</FormHelperText>}
       </Stack>
     </Drawer>
   )

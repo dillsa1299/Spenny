@@ -311,6 +311,93 @@ public class SpendingEndpointsTests
         Assert.Single(monthA!.Occurrences);
     }
 
+    [Fact]
+    public async Task AmountRequiredBy_PastOrTodayTarget_ReturnsValidationProblem()
+    {
+        await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+
+        await AuthTestHelpers.SignInVerifiedAsync(factory, client, "arb-past@example.com", "ArbPast");
+
+        var today = await client.GetAsync("/api/spending/amount-required-by?targetDate=2026-10-10");
+        Assert.Equal(HttpStatusCode.BadRequest, today.StatusCode);
+
+        var past = await client.GetAsync("/api/spending/amount-required-by?targetDate=2026-10-01");
+        Assert.Equal(HttpStatusCode.BadRequest, past.StatusCode);
+
+        var missing = await client.GetAsync("/api/spending/amount-required-by");
+        Assert.Equal(HttpStatusCode.BadRequest, missing.StatusCode);
+    }
+
+    [Fact]
+    public async Task AmountRequiredBy_SumsThroughTargetIncludingCrossMonth()
+    {
+        await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+
+        await AuthTestHelpers.SignInVerifiedAsync(factory, client, "arb-sum@example.com", "ArbSum");
+
+        var createOct = await client.PostAsJsonAsync("/api/spending/series", new
+        {
+            name = "Oct bill",
+            amount = 40m,
+            anchorDate = "2026-10-20",
+            frequency = SpendingFrequency.OneOff,
+            category = SpendingCategory.General,
+            roundWeekendToFriday = false,
+        });
+        Assert.Equal(HttpStatusCode.Created, createOct.StatusCode);
+
+        var createNov = await client.PostAsJsonAsync("/api/spending/series", new
+        {
+            name = "Nov bill",
+            amount = 60m,
+            anchorDate = "2026-11-05",
+            frequency = SpendingFrequency.OneOff,
+            category = SpendingCategory.Bills,
+            roundWeekendToFriday = false,
+        });
+        Assert.Equal(HttpStatusCode.Created, createNov.StatusCode);
+
+        var result = await client.GetFromJsonAsync<AmountRequiredByPayload>(
+            "/api/spending/amount-required-by?targetDate=2026-11-05");
+        Assert.NotNull(result);
+        Assert.Equal(new DateOnly(2026, 10, 10), result.AsOfDate);
+        Assert.Equal(new DateOnly(2026, 11, 5), result.TargetDate);
+        Assert.Equal(100m, result.Total);
+    }
+
+    [Fact]
+    public async Task AmountRequiredBy_EmptyWindow_ReturnsZero()
+    {
+        await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+
+        await AuthTestHelpers.SignInVerifiedAsync(factory, client, "arb-empty@example.com", "ArbEmpty");
+
+        var result = await client.GetFromJsonAsync<AmountRequiredByPayload>(
+            "/api/spending/amount-required-by?targetDate=2026-10-20");
+        Assert.NotNull(result);
+        Assert.Equal(0m, result.Total);
+    }
+
+    [Fact]
+    public async Task AmountRequiredBy_UnverifiedUser_CannotAccess()
+    {
+        await using var factory = new SpendingWebApplicationFactory(new FakeTimeProvider(FixedUtc));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
+
+        await AuthTestHelpers.RegisterAsync(client, "arb-unverified@example.com", "User");
+
+        var response = await client.GetAsync("/api/spending/amount-required-by?targetDate=2026-10-20");
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    private sealed record AmountRequiredByPayload(
+        DateOnly AsOfDate,
+        DateOnly TargetDate,
+        decimal Total);
+
     private sealed record SeriesPayload(
         Guid Id,
         string Name,

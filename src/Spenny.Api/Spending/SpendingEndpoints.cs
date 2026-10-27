@@ -1,4 +1,4 @@
-// Authenticated CRUD for Spending series templates and month projection bundle for Dashboard/Spending UI.
+// Authenticated CRUD for Spending series templates, month projection, and amount-required-by range total.
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +28,7 @@ public static class SpendingEndpoints
         spending.MapPut("/series/{seriesId:guid}/exceptions/{occurrenceDate}", UpsertExceptionAsync);
         spending.MapDelete("/series/{seriesId:guid}/exceptions/{occurrenceDate}", SkipOccurrenceAsync);
         spending.MapGet("/months/{year:int}/{month:int}", GetMonthAsync);
+        spending.MapGet("/amount-required-by", GetAmountRequiredByAsync);
 
         return api;
     }
@@ -178,6 +179,46 @@ public static class SpendingEndpoints
         var projection = SpendingMonthProjection.Project(series, exceptions, year, month, asOfDate);
 
         return Results.Ok(MonthResponse.FromProjection(year, month, asOfDate, projection));
+    }
+
+    private static async Task<IResult> GetAmountRequiredByAsync(
+        DateOnly? targetDate,
+        ClaimsPrincipal user,
+        SpennyDbContext db,
+        TimeProvider timeProvider,
+        CancellationToken cancellationToken)
+    {
+        var userId = RequireUserId(user);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var asOfDate = LondonCalendar.TodayInLondon(timeProvider);
+        if (targetDate is null || targetDate.Value <= asOfDate)
+        {
+            return Results.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["targetDate"] = ["Target date must be a future date after today."],
+            });
+        }
+
+        var entities = await db.SpendingSeries
+            .AsNoTracking()
+            .Where(s => s.UserId == userId)
+            .ToListAsync(cancellationToken);
+
+        var seriesIds = entities.Select(s => s.Id).ToList();
+        var exceptionEntities = await db.SpendingExceptions
+            .AsNoTracking()
+            .Where(e => seriesIds.Contains(e.SeriesId))
+            .ToListAsync(cancellationToken);
+
+        var series = entities.Select(SpendingSeriesMapper.ToDomain).ToList();
+        var exceptions = exceptionEntities.Select(SpendingExceptionMapper.ToDomain).ToList();
+        var total = AmountRequiredBy.Sum(series, exceptions, asOfDate, targetDate.Value);
+
+        return Results.Ok(new AmountRequiredByResponse(asOfDate, targetDate.Value, total));
     }
 
     private static async Task<IResult> UpsertExceptionAsync(
@@ -484,6 +525,11 @@ public static class SpendingEndpoints
         DateOnly EffectiveDate,
         decimal DayTotal,
         decimal RemainingAfter);
+
+    private sealed record AmountRequiredByResponse(
+        DateOnly AsOfDate,
+        DateOnly TargetDate,
+        decimal Total);
 
     private sealed record MonthResponse(
         int Year,
