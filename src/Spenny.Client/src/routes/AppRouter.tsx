@@ -1,10 +1,12 @@
 // Application routes: public marketing, auth flows, and authenticated app shell.
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { GuestOnly } from '@/auth/GuestOnly'
 import { RequireAdminLayout } from '@/auth/RequireAdminLayout'
 import { RequireDomainAccessLayout } from '@/auth/RequireDomainAccessLayout'
+import { CookieConsentProvider } from '@/consent/CookieConsentContext'
 import { AppShell } from '@/layout/AppShell'
 import { AuthenticatedShell } from '@/layout/AuthenticatedShell'
+import { CookiePolicyPage } from '@/pages/CookiePolicyPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { IncomePage } from '@/pages/IncomePage'
 import { LandingPage } from '@/pages/LandingPage'
@@ -19,10 +21,20 @@ import { SignUpPage } from '@/pages/auth/SignUpPage'
 import { VerifyEmailPage } from '@/pages/auth/VerifyEmailPage'
 import { RouteTitleLayout } from '@/routes/RouteTitleLayout'
 
+/** Global consent chrome inside the router so policy links use client navigation. */
+function CookieConsentLayout() {
+  return (
+    <CookieConsentProvider>
+      <Outlet />
+    </CookieConsentProvider>
+  )
+}
+
 /** Route tree shared by BrowserRouter (app) and MemoryRouter (tests). */
 export function AppRouteTree() {
   return (
     <Route element={<RouteTitleLayout />}>
+      <Route element={<CookieConsentLayout />}>
         <Route element={<AppShell />}>
           <Route
             path="/"
@@ -38,6 +50,7 @@ export function AppRouteTree() {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/cookies" element={<CookiePolicyPage />} />
         </Route>
 
         <Route element={<RequireDomainAccessLayout />}>
@@ -52,6 +65,7 @@ export function AppRouteTree() {
             <Route path="/app" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Route>
+      </Route>
     </Route>
   )
 }

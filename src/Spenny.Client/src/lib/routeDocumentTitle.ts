@@ -13,6 +13,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/income': 'Income',
   '/profile': 'Profile',
   '/admin': 'Admin',
+  '/cookies': 'Cookie policy',
 }
 
 export function documentTitleForPath(pathname: string): string {

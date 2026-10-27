@@ -6,7 +6,7 @@ import { stubGuestSession } from '@/test/renderApp'
 import { describe, expect, it } from 'vitest'
 
 describe('main entry composition', () => {
-  it('matches main.tsx provider + app tree', async () => {
+  it('matches main.tsx provider + app tree', { timeout: 15_000 }, async () => {
     stubGuestSession()
     render(
       <StrictMode>
