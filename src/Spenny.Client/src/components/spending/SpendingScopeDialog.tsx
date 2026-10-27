@@ -2,7 +2,6 @@
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
 import { Layers } from 'lucide-react'
 import { BottomSheetHeader } from '@/components/BottomSheetChrome'
 import { PressableButton } from '@/components/PressableButton'
