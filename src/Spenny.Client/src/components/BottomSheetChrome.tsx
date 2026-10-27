@@ -24,9 +24,10 @@ type BottomSheetHeaderProps = {
   icon: ReactNode
   title: string
   subtitle?: string
+  titleId?: string
 }
 
-export function BottomSheetHeader({ icon, title, subtitle }: BottomSheetHeaderProps) {
+export function BottomSheetHeader({ icon, title, subtitle, titleId }: BottomSheetHeaderProps) {
   return (
     <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 2.5 }}>
       <Box
@@ -45,6 +46,8 @@ export function BottomSheetHeader({ icon, title, subtitle }: BottomSheetHeaderPr
       </Box>
       <Box sx={{ minWidth: 0 }}>
         <Typography
+          id={titleId}
+          component="h2"
           variant="h6"
           sx={{
             fontWeight: 700,

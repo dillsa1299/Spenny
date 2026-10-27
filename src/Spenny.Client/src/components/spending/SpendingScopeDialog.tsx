@@ -33,6 +33,7 @@ export function SpendingScopeDialog({
     <Dialog
       open={open}
       onClose={onClose}
+      aria-labelledby="spending-scope-title"
       slotProps={{
         backdrop: {
           sx: {
@@ -64,6 +65,7 @@ export function SpendingScopeDialog({
         <BottomSheetHeader
           icon={<Layers size={22} strokeWidth={2.25} aria-hidden />}
           title="Edit spending"
+          titleId="spending-scope-title"
           subtitle="This item repeats. What do you want to change?"
         />
         <Stack spacing={1.25}>
