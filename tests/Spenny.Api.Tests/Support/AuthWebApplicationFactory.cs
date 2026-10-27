@@ -1,5 +1,7 @@
 // Test host with in-memory SQLite so Identity and auth endpoints run without PostgreSQL.
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +45,11 @@ public class AuthWebApplicationFactory : WebApplicationFactory<Program>, IDispos
         {
             services.AddDbContext<SpennyDbContext>(options => options.UseSqlite(_connection));
             services.AddSpennyAuth(context.Configuration);
+            // Spending/admin tests freeze TimeProvider far behind wall-clock; cookie tickets must
+            // still validate when issuance and expiry checks disagree on which clock they use.
+            services.PostConfigure<CookieAuthenticationOptions>(
+                IdentityConstants.ApplicationScheme,
+                options => options.ExpireTimeSpan = TimeSpan.FromDays(3650));
             _configureTestServices?.Invoke(services);
         });
     }
