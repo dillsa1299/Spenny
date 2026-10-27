@@ -2,7 +2,6 @@
  * Global cookie consent: first-visit banner, persisted choice, and a revisit control.
  * Mount once in AppProviders so public and authenticated shells share the same gate.
  */
-import Button from '@mui/material/Button'
 import {
   createContext,
   useCallback,
@@ -71,32 +70,6 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
     <CookieConsentContext.Provider value={value}>
       {children}
       {bannerOpen ? <CookieConsentBanner onAccept={accept} onReject={reject} /> : null}
-      {!bannerOpen ? (
-        <Button
-          type="button"
-          variant="text"
-          size="small"
-          onClick={openSettings}
-          sx={{
-            position: 'fixed',
-            left: 8,
-            bottom: { xs: 72, sm: 72 },
-            zIndex: (theme) => theme.zIndex.appBar - 1,
-            color: 'text.secondary',
-            textTransform: 'none',
-            fontSize: '0.75rem',
-            minWidth: 0,
-            px: 1,
-            py: 0.5,
-            opacity: 0.85,
-            '@media (prefers-reduced-motion: reduce)': {
-              transition: 'none',
-            },
-          }}
-        >
-          Cookie settings
-        </Button>
-      ) : null}
     </CookieConsentContext.Provider>
   )
 }

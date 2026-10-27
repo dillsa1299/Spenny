@@ -1,16 +1,17 @@
 /**
- * Fixed bottom cookie consent dialog: equal-weight Accept / Reject and a policy link.
- * Sits above authenticated bottom nav via safe bottom offset; does not gate auth cookies.
+ * Full-width cookie bar fixed to the bottom of the viewport.
+ * On signed-in routes it sits just above the primary bottom navigation.
  */
 import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
 import Link from '@mui/material/Link'
-import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useEffect, useId, useRef } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
 import { PressableButton } from '@/components/PressableButton'
-import { glassPanelSx } from '@/theme/surfaces'
+import { AUTH_BOTTOM_NAV_OFFSET_PX, pathHasBottomNav } from '@/consent/cookieConsentLayout'
+import { shellNavChromeSx } from '@/theme/surfaces'
 
 type CookieConsentBannerProps = {
   onAccept: () => void
@@ -21,6 +22,8 @@ export function CookieConsentBanner({ onAccept, onReject }: CookieConsentBannerP
   const titleId = useId()
   const descriptionId = useId()
   const headingRef = useRef<HTMLHeadingElement>(null)
+  const { pathname } = useLocation()
+  const aboveBottomNav = pathHasBottomNav(pathname)
 
   useEffect(() => {
     headingRef.current?.focus()
@@ -28,43 +31,30 @@ export function CookieConsentBanner({ onAccept, onReject }: CookieConsentBannerP
 
   return (
     <Box
+      component="div"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
       sx={{
         position: 'fixed',
         left: 0,
         right: 0,
-        bottom: 0,
+        bottom: aboveBottomNav ? AUTH_BOTTOM_NAV_OFFSET_PX : 0,
         zIndex: (theme) => theme.zIndex.snackbar + 1,
-        px: 2,
-        pb: { xs: 10, sm: 10 },
-        pt: 1,
-        pointerEvents: 'none',
+        ...shellNavChromeSx,
+        '@media (prefers-reduced-motion: reduce)': {
+          transition: 'none',
+        },
       }}
     >
-      <Paper
-        component="div"
-        role="dialog"
-        aria-modal="false"
-        aria-labelledby={titleId}
-        aria-describedby={descriptionId}
-        elevation={0}
-        sx={{
-          pointerEvents: 'auto',
-          maxWidth: 720,
-          mx: 'auto',
-          p: { xs: 2, sm: 2.5 },
-          borderRadius: 2,
-          ...glassPanelSx,
-          '@media (prefers-reduced-motion: reduce)': {
-            transition: 'none',
-          },
-        }}
-      >
-        <Stack spacing={2}>
+      <Container maxWidth="sm" disableGutters sx={{ px: 2, py: 1.5 }}>
+        <Stack spacing={1.5}>
           <Typography
             ref={headingRef}
             id={titleId}
             component="h2"
-            variant="subtitle1"
+            variant="subtitle2"
             tabIndex={-1}
             sx={{ fontWeight: 700, outline: 'none' }}
           >
@@ -74,19 +64,19 @@ export function CookieConsentBanner({ onAccept, onReject }: CookieConsentBannerP
             We use strictly necessary cookies to keep you signed in. We do not use analytics or
             marketing cookies unless you accept. You can change this later.{' '}
             <Link component={RouterLink} to="/cookies" underline="hover">
-              Cookie policy
+              Cookies
+            </Link>
+            {' · '}
+            <Link component={RouterLink} to="/privacy" underline="hover">
+              Privacy
             </Link>
           </Typography>
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1.5}
-            sx={{ width: '100%' }}
-          >
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ width: '100%' }}>
             <PressableButton
               variant="outlined"
               color="inherit"
               onClick={onReject}
-              sx={{ flex: 1, fontWeight: 600, py: 1.25 }}
+              sx={{ flex: 1, fontWeight: 600 }}
             >
               Reject non-essential
             </PressableButton>
@@ -94,13 +84,13 @@ export function CookieConsentBanner({ onAccept, onReject }: CookieConsentBannerP
               variant="outlined"
               color="inherit"
               onClick={onAccept}
-              sx={{ flex: 1, fontWeight: 600, py: 1.25 }}
+              sx={{ flex: 1, fontWeight: 600 }}
             >
               Accept all
             </PressableButton>
           </Stack>
         </Stack>
-      </Paper>
+      </Container>
     </Box>
   )
 }

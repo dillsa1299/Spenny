@@ -14,6 +14,8 @@ const PAGE_TITLES: Record<string, string> = {
   '/profile': 'Profile',
   '/admin': 'Admin',
   '/cookies': 'Cookie policy',
+  '/privacy': 'Privacy policy',
+  '/contact': 'Contact',
 }
 
 export function documentTitleForPath(pathname: string): string {

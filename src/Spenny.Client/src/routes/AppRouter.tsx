@@ -6,7 +6,9 @@ import { RequireDomainAccessLayout } from '@/auth/RequireDomainAccessLayout'
 import { CookieConsentProvider } from '@/consent/CookieConsentContext'
 import { AppShell } from '@/layout/AppShell'
 import { AuthenticatedShell } from '@/layout/AuthenticatedShell'
+import { ContactPage } from '@/pages/ContactPage'
 import { CookiePolicyPage } from '@/pages/CookiePolicyPage'
+import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { IncomePage } from '@/pages/IncomePage'
 import { LandingPage } from '@/pages/LandingPage'
@@ -51,6 +53,8 @@ export function AppRouteTree() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/cookies" element={<CookiePolicyPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/contact" element={<ContactPage />} />
         </Route>
 
         <Route element={<RequireDomainAccessLayout />}>

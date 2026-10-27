@@ -20,7 +20,8 @@ describe('CookieConsentBanner', () => {
     )
 
     expect(screen.getByRole('dialog', { name: 'Cookies' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Cookie policy' })).toHaveAttribute('href', '/cookies')
+    expect(screen.getByRole('link', { name: 'Cookies' })).toHaveAttribute('href', '/cookies')
+    expect(screen.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy')
 
     await user.click(screen.getByRole('button', { name: 'Accept all' }))
     expect(onAccept).toHaveBeenCalledTimes(1)

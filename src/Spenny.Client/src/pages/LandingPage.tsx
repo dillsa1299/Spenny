@@ -178,7 +178,7 @@ export function LandingPage() {
                 See it in action
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                Example data — not your account.
+                Example data, not your account.
               </Typography>
             </Stack>
           </Box>

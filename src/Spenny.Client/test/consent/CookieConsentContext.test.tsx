@@ -12,8 +12,15 @@ import { CookieConsentProvider, useCookieConsent } from '@/consent/CookieConsent
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 function GateProbe() {
-  const { canLoadNonEssential: allowed } = useCookieConsent()
-  return <span data-testid="gate">{allowed ? 'open' : 'closed'}</span>
+  const { canLoadNonEssential: allowed, openSettings } = useCookieConsent()
+  return (
+    <>
+      <span data-testid="gate">{allowed ? 'open' : 'closed'}</span>
+      <button type="button" onClick={openSettings}>
+        Reopen settings
+      </button>
+    </>
+  )
 }
 
 function renderConsentApp() {
@@ -52,7 +59,6 @@ describe('CookieConsentProvider', () => {
     await user.click(screen.getByRole('button', { name: 'Accept all' }))
 
     expect(screen.queryByRole('dialog', { name: 'Cookies' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Cookie settings' })).toBeInTheDocument()
     expect(screen.getByTestId('gate')).toHaveTextContent('open')
     expect(canLoadNonEssential()).toBe(true)
 
@@ -60,7 +66,6 @@ describe('CookieConsentProvider', () => {
     renderConsentApp()
 
     expect(screen.queryByRole('dialog', { name: 'Cookies' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Cookie settings' })).toBeInTheDocument()
     expect(canLoadNonEssential()).toBe(true)
   })
 
@@ -84,12 +89,12 @@ describe('CookieConsentProvider', () => {
     expect(canLoadNonEssential()).toBe(false)
   })
 
-  it('Cookie settings restores the banner while keeping the prior decision until changed', async () => {
+  it('openSettings restores the banner while keeping the prior decision until changed', async () => {
     const user = userEvent.setup()
     renderConsentApp()
 
     await user.click(screen.getByRole('button', { name: 'Accept all' }))
-    await user.click(screen.getByRole('button', { name: 'Cookie settings' }))
+    await user.click(screen.getByRole('button', { name: 'Reopen settings' }))
 
     expect(screen.getByRole('dialog', { name: 'Cookies' })).toBeInTheDocument()
     expect(JSON.parse(localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY)!).decision).toBe(

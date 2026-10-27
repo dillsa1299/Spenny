@@ -10,6 +10,8 @@ describe('documentTitleForPath', () => {
     expect(documentTitleForPath('/dashboard')).toBe(`Dashboard · ${APP_DOCUMENT_TITLE}`)
     expect(documentTitleForPath('/sign-in')).toBe(`Sign in · ${APP_DOCUMENT_TITLE}`)
     expect(documentTitleForPath('/cookies')).toBe(`Cookie policy · ${APP_DOCUMENT_TITLE}`)
+    expect(documentTitleForPath('/privacy')).toBe(`Privacy policy · ${APP_DOCUMENT_TITLE}`)
+    expect(documentTitleForPath('/contact')).toBe(`Contact · ${APP_DOCUMENT_TITLE}`)
   })
 
   it('falls back to the product name for unknown paths', () => {

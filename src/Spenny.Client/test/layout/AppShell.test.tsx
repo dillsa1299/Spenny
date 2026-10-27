@@ -17,5 +17,10 @@ describe('AppShell', () => {
 
     expect(screen.getByRole('link', { name: 'Spenny' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Page body' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy')
+    expect(screen.getByRole('link', { name: 'Cookies' })).toHaveAttribute('href', '/cookies')
+    expect(screen.getByRole('link', { name: 'Contact' })).toHaveAttribute('href', '/contact')
   })
 })
+
+
