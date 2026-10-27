@@ -1,4 +1,5 @@
-// When enabled, walks backward to the previous weekday that is not a UK bank holiday.
+// When enabled, walks forward to the next weekday that is not a UK bank holiday.
+// API/DB flag remains RoundWeekendToFriday (historical name); for spending it means next UK working day.
 namespace Spenny.Api.Domain.Scheduling;
 
 public static class WeekendAdjustment
@@ -13,7 +14,7 @@ public static class WeekendAdjustment
         var date = scheduledDate;
         while (!IsUkWorkingDay(date))
         {
-            date = date.AddDays(-1);
+            date = date.AddDays(1);
         }
 
         return date;

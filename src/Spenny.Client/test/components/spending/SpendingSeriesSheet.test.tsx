@@ -29,7 +29,7 @@ describe('SpendingSeriesSheet', () => {
 
   it('defaults UK working day option on in create mode', () => {
     renderCreateSheet()
-    expect(screen.getByRole('checkbox', { name: /use previous uk working day/i })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: /use next uk working day/i })).toBeChecked()
   })
 
   it('accepts digits and a decimal in the amount field', async () => {
