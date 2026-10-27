@@ -257,11 +257,11 @@ export function SpendingSeriesSheet({
           />
           <Stack spacing={0.25} sx={{ flex: 1, minWidth: 0, pt: 0.75 }}>
             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600 }}>
-              Use previous UK working day
+              Use next UK working day
             </Typography>
             <FormHelperText component="div" sx={{ m: 0, color: 'text.secondary', lineHeight: 1.45 }}>
-              If the scheduled date falls on a weekend or UK bank holiday, show it on the previous weekday that is
-              not a bank holiday.
+              If the scheduled date falls on a weekend or UK bank holiday, show it on the next weekday that is not a
+              bank holiday.
             </FormHelperText>
           </Stack>
         </Box>

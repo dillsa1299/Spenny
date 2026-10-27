@@ -110,7 +110,7 @@ public class SpendingMonthProjectionTests
     }
 
     [Fact]
-    public void Project_WeekendRounding_ShiftsSaturdayToPreviousFriday()
+    public void Project_WeekendRounding_ShiftsSaturdayToNextMonday()
     {
         var saturdayBill = ProjectionTestFixtures.Series(
             SeriesA,
@@ -128,7 +128,7 @@ public class SpendingMonthProjectionTests
             new DateOnly(2026, 10, 1));
 
         Assert.Single(result.Occurrences);
-        Assert.Equal(new DateOnly(2026, 10, 2), result.Occurrences[0].EffectiveDate);
+        Assert.Equal(new DateOnly(2026, 10, 5), result.Occurrences[0].EffectiveDate);
     }
 
     [Fact]

@@ -43,7 +43,7 @@ Spending is auto-settled on its effective date (no mark-paid). All amounts in GB
 18. As a signed-in user, I want to open a Spending list for the month that includes past and future dates, so that I can review everything in that month.
 19. As a signed-in user, I want to add a one-off Spending with name, amount, date, and category, so that I can track a single bill.
 20. As a signed-in user, I want to add recurring Spending (weekly, monthly, yearly), so that subscriptions and regular bills are modeled once.
-21. As a signed-in user, I want to optionally round weekend dates to the previous Friday, so that my chart matches when money actually leaves.
+21. As a signed-in user, I want to optionally round weekend or bank-holiday dates to the next UK working day, so that my chart matches when money actually leaves.
 22. As a signed-in user, I want to pick a category from the fixed Spenny list, so that spending is grouped consistently.
 23. As a signed-in user, I want an optional description on Spending, so that I can add notes without cluttering lists.
 24. As a signed-in user, I want to backfill Spending on past dates in a month, so that I can set up my account mid-month accurately.
@@ -73,7 +73,7 @@ Spending is auto-settled on its effective date (no mark-paid). All amounts in GB
 - **Admin:** Boolean `IsAdmin` on user; set only via operations/DB. Admin-only endpoints return 403 for non-admins; client hides Admin nav and shows not-found for admin routes.
 - **Persistence:** PostgreSQL via EF Core (align with ADR 0002). Entities at minimum: User (profile fields, auth provider type, admin flag), Spending series (template fields), Spending exceptions (per-occurrence overrides/cancellations), login audit events for admin “unique logins in 24h” (store timestamp + user id, no PII in admin aggregates).
 - **Spending model:** Series holds name, amount, frequency, category, weekend-round flag, optional description, anchor date. Exceptions override or suppress a single calendar occurrence. Occurrences for a month are **derived** at read time (or materialized with clear regeneration rules on series edit).
-- **Calendar rules:** Europe/London for month boundaries, “today,” and admin windows. UK working-day adjustment when flag enabled: walk back to previous weekday that is not a UK public holiday (Nager.Date GB).
+- **Calendar rules:** Europe/London for month boundaries, “today,” and admin windows. UK working-day adjustment when flag enabled: walk forward to the next weekday that is not a UK public holiday (Nager.Date GB).
 - **Settlement semantics:** No paid/unpaid flags. Burndown and lists are computed from effective dates vs “as of” today. “Coming up” = effective date strictly after today in selected month.
 - **Categories:** Closed enum matching functional spec list (including `Income` as a Spending category until Income feature ships).
 - **Month API shape:** Authenticated endpoints return a month bundle: burndown points (start-of-month total, step downs per date, remaining-at-today for current month), occurrences for Spending screen, upcoming subset for Dashboard. Client may compute burndown only if server is source of truth for occurrence expansion — **server must own occurrence expansion** so web and future clients agree.
@@ -89,7 +89,7 @@ Occurrence generation for a `(year, month)` from series + exceptions should beha
 ```text
 for each series owned by user
   expand raw occurrence dates into [month] per frequency
-  apply weekend-to-Friday if flagged
+  apply next-UK-working-day adjustment if flagged
   apply exception: skip, replace fields, or add one-off
 dedupe by (seriesId, effectiveDate) with exception winning
 sort by effectiveDate
