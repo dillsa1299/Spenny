@@ -10,6 +10,7 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useEffect, useState } from 'react'
 import { PressableButton } from '@/components/PressableButton'
+import { sanitizeAmountInput } from '@/lib/sanitizeAmountInput'
 import type { SpendingOccurrenceDto } from '@/api/spendingTypes'
 import {
   SPENDING_CATEGORY_OPTIONS,
@@ -151,7 +152,7 @@ export function SpendingExceptionSheet({
           label="Amount (£)"
           inputMode="decimal"
           value={form.amount}
-          onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+          onChange={(e) => setForm((f) => ({ ...f, amount: sanitizeAmountInput(e.target.value) }))}
           error={Boolean(errors.amount)}
           helperText={errors.amount}
           fullWidth
