@@ -7,7 +7,7 @@ export function comingUpEmptyMessage(month: SpendingMonthDto): string {
     : selectedIndex
 
   if (selectedIndex < asOfIndex) {
-    return 'This month is complete — nothing left to come up.'
+    return 'This month is complete. Nothing left to come up.'
   }
   if (month.monthTotal === 0) {
     return 'No spending scheduled this month.'

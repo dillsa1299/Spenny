@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography'
 import { BarChart2, HandCoins, LayoutDashboard, LogOut, User, Wallet } from 'lucide-react'
 import { Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthContext'
+import { SiteLegalFooter } from '@/consent/SiteLegalFooter'
 import { authenticatedShellGreeting } from '@/lib/authenticatedShellGreeting'
 import { SelectedMonthProvider } from '@/month/SelectedMonthContext'
 import { ShellStickyHeader } from '@/layout/ShellStickyHeader'
@@ -114,12 +115,15 @@ export function AuthenticatedShell() {
             flexDirection: 'column',
             px: 2,
             pt: 2,
-            pb: 10,
+            pb: 2,
             width: '100%',
           }}
         >
           <Outlet />
         </Container>
+        <Box sx={{ pb: 10 }}>
+          <SiteLegalFooter />
+        </Box>
         <Box
           component="nav"
           aria-label="Primary"

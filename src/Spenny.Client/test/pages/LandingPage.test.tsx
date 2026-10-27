@@ -22,7 +22,7 @@ describe('LandingPage', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Spenny' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: /left of this month/i })).toBeInTheDocument()
     expect(screen.getByText('Mobile-first')).toBeInTheDocument()
-    expect(screen.getByText('Example data — not your account.')).toBeInTheDocument()
+    expect(screen.getByText('Example data, not your account.')).toBeInTheDocument()
 
     await waitFor(() => {
       expect(screen.getByText('/ £1,049.00')).toBeInTheDocument()

@@ -6,12 +6,13 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { Link as RouterLink, Outlet } from 'react-router-dom'
 import { PressableButton } from '@/components/PressableButton'
+import { SiteLegalFooter } from '@/consent/SiteLegalFooter'
 import { ShellStickyHeader } from '@/layout/ShellStickyHeader'
 import { shellAppBarSx } from '@/theme/surfaces'
 
 export function AppShell() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <ShellStickyHeader>
       <AppBar position="static" elevation={0} sx={shellAppBarSx}>
         <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 64 } }}>
@@ -49,12 +50,14 @@ export function AppShell() {
         sx={{
           width: '100%',
           maxWidth: 960,
+          flex: 1,
           py: { xs: 3, sm: 4, md: 5 },
           px: { xs: 2, sm: 3 },
         }}
       >
         <Outlet />
       </Container>
+      <SiteLegalFooter />
     </Box>
   )
 }

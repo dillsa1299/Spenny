@@ -22,7 +22,7 @@ export function IncomePage() {
         </Typography>
         <Typography color="text.secondary" sx={{ mt: 1 }}>
           Spenny v1 focuses on scheduled spending and your month burndown. Income will sit alongside
-          that picture when it ships — this tab is here so you know it is planned, not missing.
+          that picture when it ships. This tab is here so you know it is planned, not missing.
         </Typography>
       </Paper>
     </Stack>
